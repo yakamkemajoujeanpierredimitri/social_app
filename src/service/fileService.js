@@ -1,0 +1,161 @@
+import { useFile } from "../context/fileProvider";
+import apiClient from "./apiClient";
+const FileService = {
+
+    uploadFile: async (file) => {
+        // Implement file upload logic here
+        const { dispatch } = useFile();
+        dispatch({ type: 'UPLOAD_VIDEO_START' });
+        try {
+            const res = await apiClient.post("/post?app=true", file, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    if (onProgress) {
+                        const percentCompleted = Math.round(
+                            (progressEvent.loaded * 100) / progressEvent.total
+                        );
+                        dispatch({
+                            type: 'UPLOAD_VIDEO_PROGRESS',
+                            payload: percentCompleted
+                        })
+                    }
+                }
+            });
+            dispatch({
+                type: 'UPLOAD_VIDEO_SUCCESS',
+                payload: { video: res.data }
+            });
+
+        } catch (error) {
+            console.error('FileService.uploadFile error:', error);
+            const errorMessage = error.response?.data?.message || 'File upload failed';
+            dispatch({
+                type: 'UPLOAD_VIDEO_ERROR',
+                payload: errorMessage
+            });
+        }
+    },
+    deleteFile: async (fileId) => {
+        const { dispatch } = useFile();
+        // Implement file deletion logic here
+        try {
+            const res = await apiClient.delete(`/post/${fileId}?app=true`);
+            dispatch({
+                type: 'DELETE_VIDEO_SUCCESS',
+            });
+        } catch (error) {
+            console.error('FileService.deleteFile error:', error);
+            const errorMessage = error.response?.data?.message || 'File deletion failed';
+            dispatch({
+                type: 'DELETE_VIDEO_ERROR',
+                payload: errorMessage
+            });
+        }
+    },
+    getFile: async (fileId) => {
+        // Implement file retrieval logic here
+        const { dispatch } = useFile();
+        dispatch({ type: 'FETCH_VIDEO_START' });
+        try {
+            const res = await apiClient.get(`/post/${fileId}?app=true`);
+            dispatch({
+                type: 'FETCH_VIDEO_SUCCESS',
+                payload: { file: res.data }
+            });
+        } catch (error) {
+            console.error('FileService.getFile error:', error);
+            const errorMessage = error.response?.data?.message || 'File retrieval failed';
+            dispatch({
+                type: 'FETCH_VIDEO_ERROR',
+                payload: errorMessage
+            });
+        }
+    },
+    getAllFiles: async () => {
+        // Implement logic to retrieve all files here
+        console.log("berfore");
+        const { dispatch } = useFile();
+        console.log('after');
+        dispatch({
+            type: "FETCH_VIDEO_START"
+        });
+        
+        try {
+            const res = await apiClient.get(`/post?app=true`);
+             console.log(res.data);
+            dispatch({
+                type: 'FETCH_VIDEO_SUCCESS',
+                payload: { file: res.data[0] }
+            });
+           
+            return{data:res.data};
+            
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'File retrieval failed';
+            console.log(errorMessage);
+            dispatch({
+                type: 'FETCH_VIDEO_ERROR',
+                payload: errorMessage
+            });
+        }
+
+    },
+    getObservation: async (fileId) => {
+        // Implement logic to get observation for a specific file
+        const { dispatch } = useFile();
+        try {
+            const res = await apiClient.get(`/post/observe/${fileId}?app=true`);
+            dispatch({
+                type: 'SET_PROP',
+                payload: res.data
+            });
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'File retrieval failed';
+            return { msg: errorMessage };
+        }
+    },
+    getAlgoFiles: async () => {
+        // Implement logic to retrieve files related to a specific algorithm
+        const { dispatch, currentPage } = useFile();
+        dispatch({
+            type: "FETCH_VIDEO_START"
+        })
+        try {
+            const res = await apiClient.get(`/user/observe?app=true&&max=${currentPage || 1}`);
+            dispatch({
+                type: 'FETCH_VIDEO_SUCCESS',
+                payload: { file: res.data[0] }
+            });
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'File retrieval failed';
+            dispatch({
+                type: 'FETCH_VIDEO_ERROR',
+                payload: errorMessage
+            });
+        }
+    },
+    addObservation: async (id, data) => {
+        const { dispatch } = useFile();
+        try {
+            const res = await apiClient.post(`/user/observe/${id}?app=true`, data);
+            if (data?.save) {
+                dispatch({
+                    type: 'SAVES_VIDEO',
+                    payload: { success: true }
+                });
+                return;
+            }
+            dispatch({
+                type: 'LIKE_VIDEO',
+                payload: { success: true }
+            });
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'File retrieval failed';
+            console.error(errorMessage);
+        }
+    }
+};
+
+export default FileService;
