@@ -2,11 +2,11 @@ import { useIsFocused } from '@react-navigation/native';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { useEffect, useState } from 'react';
 import {
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableWithoutFeedback,
-    View,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -14,7 +14,6 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const VideoPlayer = ({ 
   videoUri, 
   isActive, 
-  onPlaybackStatusUpdate,
   style 
 }) => {
   const [showControls, setShowControls] = useState(false);
@@ -24,22 +23,10 @@ const VideoPlayer = ({
   // Create video player instance
   const player = useVideoPlayer(videoUri, player => {
     player.loop = true;
-    player.muted = false;
+    player.play();
   });
 
-  useEffect(() => {
-    // Listen to player status updates
-    const subscription = player.addListener('playingChange', (newIsPlaying) => {
-      setIsPlaying(newIsPlaying);
-      if (onPlaybackStatusUpdate) {
-        onPlaybackStatusUpdate({ isPlaying: newIsPlaying });
-      }
-    });
-
-    return () => {
-      subscription?.remove();
-    };
-  }, [player, onPlaybackStatusUpdate]);
+  
 
   useEffect(() => {
     if (isActive && isFocused) {
@@ -47,6 +34,7 @@ const VideoPlayer = ({
     } else {
       player.pause();
     }
+    console.log(`isactive=${isActive} && isfocuse=${isFocused} `);
   }, [isActive, isFocused, player]);
 
   const handlePlayPause = () => {
@@ -55,6 +43,7 @@ const VideoPlayer = ({
     } else {
       player.play();
     }
+    setIsPlaying(!isPlaying);
   };
 
   const handlePress = () => {
@@ -63,18 +52,19 @@ const VideoPlayer = ({
   };
 
   return (
-    <TouchableWithoutFeedback onPress={handlePress}>
-      <View style={[styles.container, style]}>
+    <TouchableWithoutFeedback onPress={handlePress} style={styles.container} >
+      <View style={styles.video}>
         <VideoView
           style={styles.video}
           player={player}
-          allowsFullscreen={false}
-          allowsPictureInPicture={false}
+          allowsFullscreen={true}
+          allowsPictureInPicture={true}
           showsTimecodes={false}
           contentFit="cover"
+          nativeControls={true}
         />
         
-        {showControls && (
+       {showControls && (
           <View style={styles.controlsOverlay}>
             <TouchableWithoutFeedback onPress={handlePlayPause}>
               <View style={styles.playButton}>
@@ -92,13 +82,17 @@ const VideoPlayer = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: SCREEN_WIDTH,
+    width: '100%' ,
     height: SCREEN_HEIGHT,
-    position: 'relative',
+    paddingBottom:20,
+    flex:1,
+    alignItems:'center'
+
   },
   video: {
-    width: '100%',
-    height: '100%',
+    marginTop:50,
+    height:'80%',
+    width:'100%'
   },
   controlsOverlay: {
     position: 'absolute',

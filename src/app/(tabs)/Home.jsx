@@ -46,7 +46,7 @@ const HomePage = () => {
       await AsyncStorage.setItem('currentpage',JSON.stringify(currentpage));
     }
    const fetchData = async ()=>{
-      const res = await FileService.getAllFiles();
+      const res = await FileService.getAllFiles(dispatch);
       if (!state.currentPage) {
       let n = await AsyncStorage.getItem('currentpage');
       n = JSON.parse(n)|| 1;
@@ -68,11 +68,12 @@ const HomePage = () => {
         type:'SET_Page',
         payload:{n:viewableItems[0].index+1}
       });
-      const currentId = viewableItems[0].item.id;
+      const currentId = viewableItems[0].item._id;
       setCurrentPostId(currentId);
     }else{
         setCurrentPostId(null);
     }
+  
   }, []);
 
   const viewabilityConfig = {
@@ -82,7 +83,7 @@ const HomePage = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-     const res =  await FileService.getAlgoFiles();
+     const res =  await FileService.getAlgoFiles(dispatch);
      if(state.error){
         Alert.alert('Error',state.error);
         return;
@@ -132,6 +133,13 @@ const HomePage = () => {
           offset: SCREEN_HEIGHT * index,
           index,
         })}
+        ListEmptyComponent={()=>(<LottieView
+      source={require('../../assets/animation/load2.json')}
+      autoPlay
+      loop
+      resizeMode='cover'
+      style={styles.anim}
+      />)}
       />}
     </View>
   );

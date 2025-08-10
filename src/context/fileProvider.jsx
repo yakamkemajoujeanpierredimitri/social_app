@@ -48,12 +48,12 @@ const videoReducer = (state, action) => {
     case 'LIKE_VIDEO':
       return {
         ...state,
-        likes:action.payload.success ? likes +1 : likes,
+        likes:action.payload.success ? state.likes +1 : state.likes,
       }; 
      case 'SAVES_VIDEO':
       return {
         ...state,
-        saves:action.payload.success ? saves +1 : saves,
+        saves:action.payload.success ? state.saves +1 : state.saves,
       }; 
     case 'UPLOAD_VIDEO_START':
       return {
@@ -112,6 +112,17 @@ const videoReducer = (state, action) => {
       return{
         recordfile:action.payload.file
       }
+      case 'DELETE_VIDEO_SUCCESS':
+      return {
+        ...state,
+        file: null,
+      };
+    
+    case 'DELETE_VIDEO_ERROR':
+      return {
+        ...state,
+        error: action.payload,
+      };
     
     default:
       return state;

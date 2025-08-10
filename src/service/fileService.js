@@ -1,10 +1,9 @@
-import { useFile } from "../context/fileProvider";
 import apiClient from "./apiClient";
 const FileService = {
 
-    uploadFile: async (file) => {
+    uploadFile: async (dispatch , file) => {
         // Implement file upload logic here
-        const { dispatch } = useFile();
+        
         dispatch({ type: 'UPLOAD_VIDEO_START' });
         try {
             const res = await apiClient.post("/post?app=true", file, {
@@ -37,8 +36,8 @@ const FileService = {
             });
         }
     },
-    deleteFile: async (fileId) => {
-        const { dispatch } = useFile();
+    deleteFile: async (dispatch,fileId) => {
+        
         // Implement file deletion logic here
         try {
             const res = await apiClient.delete(`/post/${fileId}?app=true`);
@@ -54,9 +53,9 @@ const FileService = {
             });
         }
     },
-    getFile: async (fileId) => {
+    getFile: async (dispatch,fileId) => {
         // Implement file retrieval logic here
-        const { dispatch } = useFile();
+        
         dispatch({ type: 'FETCH_VIDEO_START' });
         try {
             const res = await apiClient.get(`/post/${fileId}?app=true`);
@@ -73,18 +72,18 @@ const FileService = {
             });
         }
     },
-    getAllFiles: async () => {
+    getAllFiles: async (dispatch) => {
         // Implement logic to retrieve all files here
-        console.log("berfore");
-        const { dispatch } = useFile();
-        console.log('after');
+        
+        
+        
         dispatch({
             type: "FETCH_VIDEO_START"
         });
         
         try {
             const res = await apiClient.get(`/post?app=true`);
-             console.log(res.data);
+             //console.log(res.data);
             dispatch({
                 type: 'FETCH_VIDEO_SUCCESS',
                 payload: { file: res.data[0] }
@@ -102,9 +101,9 @@ const FileService = {
         }
 
     },
-    getObservation: async (fileId) => {
+    getObservation: async (dispatch,fileId) => {
         // Implement logic to get observation for a specific file
-        const { dispatch } = useFile();
+        
         try {
             const res = await apiClient.get(`/post/observe/${fileId}?app=true`);
             dispatch({
@@ -116,9 +115,9 @@ const FileService = {
             return { msg: errorMessage };
         }
     },
-    getAlgoFiles: async () => {
+    getAlgoFiles: async (dispatch) => {
         // Implement logic to retrieve files related to a specific algorithm
-        const { dispatch, currentPage } = useFile();
+        
         dispatch({
             type: "FETCH_VIDEO_START"
         })
@@ -136,8 +135,8 @@ const FileService = {
             });
         }
     },
-    addObservation: async (id, data) => {
-        const { dispatch } = useFile();
+    addObservation: async ( dispatch, id, data) => {
+        
         try {
             const res = await apiClient.post(`/user/observe/${id}?app=true`, data);
             if (data?.save) {

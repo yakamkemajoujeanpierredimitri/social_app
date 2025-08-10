@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import {
-    Dimensions,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useFile } from '../context/fileProvider';
@@ -15,9 +15,10 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const BottomFeature = ({ file, isActive, index }) => {
   const [isLiked, setIsLiked] = useState( false);
-  const [likeCount, setLikeCount] = useState(video.likes || 0);
+  const [likeCount, setLikeCount] = useState( 0);
   const [saves, setSaves] = useState(0);
-  const { state: authState } = useFile();
+  const { state: authState ,dispatch} = useFile();
+//  console.log(file);
 useEffect(()=>{
     const paly = async ()=>{
         await FileService.getObservation(file._id);
@@ -32,30 +33,30 @@ useEffect(()=>{
 
   const handleLike = async () => {
     const newLikedState = !isLiked;
-    await FileService.addObservation(file._id,{likes:1});
+    await FileService.addObservation(dispatch,file._id,{likes:1});
     setIsLiked(newLikedState);
   };
     const handleSave = async () => {
-    await FileService.addObservation(file._id,{save:1});
+    await FileService.addObservation(dispatch, file._id,{save:1});
   };
 
  
 
   const handleShare = () => {
     // Implement share functionality
-    console.log('Share video:', video._id);
+    console.log('Share video:', file._id);
   };
 
   const handleComment = () => {
     // Navigate to comments screen
-    console.log('Open comments for video:', video._id);
+    console.log('Open comments for video:' );
   };
 
   return (
   
         
         <View style={styles.rightContent}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
+          <TouchableOpacity style={styles.actionButton} onPress={()=>handleLike}>
             <Icon
               name={isLiked ? 'heart' : 'heart-outline'}
               size={28}
@@ -66,18 +67,18 @@ useEffect(()=>{
 
           <TouchableOpacity style={styles.actionButton} onPress={handleComment}>
             <Icon name="chatbubble-outline" size={28} color="#fff" />
-            <Text style={styles.actionText}>{video.comments || 0}</Text>
+            <Text style={styles.actionText}>{ 0}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
             <Icon name="share-outline" size={28} color="#fff" />
-            <Text style={styles.actionText}>{video.shares || 0}</Text>
+            <Text style={styles.actionText}>{ 0}</Text>
           </TouchableOpacity>
-  <TouchableOpacity style={styles.actionButton} onPress={handleSave}>
+  <TouchableOpacity style={styles.actionButton} onPress={()=>handleSave}>
             <Icon name="mark" size={28} color="#fff" />
             <Text style={styles.actionText}>{saves}</Text>
           </TouchableOpacity>
-           <TouchableOpacity style={styles.actionButton} onPress={handleSave}>
+           <TouchableOpacity style={styles.actionButton} >
             <Icon name="eye" size={28} color="#fff" />
             <Text style={styles.actionText}>{authState.view}</Text>
           </TouchableOpacity>
@@ -170,6 +171,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     width: 60,
+    
   },
   actionButton: {
     alignItems: 'center',

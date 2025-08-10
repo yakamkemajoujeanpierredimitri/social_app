@@ -47,7 +47,14 @@
           "savePhotosPermission": "Allow saving videos to photo library"
         }
       ],
-      "expo-video"
+         [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
+      ]
+
     ],
     "experiments": {
       "typedRoutes": true

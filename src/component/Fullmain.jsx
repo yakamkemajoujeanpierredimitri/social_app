@@ -7,16 +7,16 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useAuth } from '../context/authProvider';
 import BottomFeature from './Bottom';
 import VideoPlayer from './VideoItem';
-
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const Fullmain = ({ file , isActive , index}) => {
 
-    const [isFollowing, setIsFollowing] = useState(video.user.isFollowing || false);
-
+    const [isFollowing, setIsFollowing] = useState(false);
+    const {state:authState}  = useAuth();
     const handleFollow = async () => {
 
     }
@@ -56,17 +56,17 @@ const Fullmain = ({ file , isActive , index}) => {
                             </View>
                         </View>
 
-                        <Text style={styles.description}>{video.description}</Text>
+                        <Text style={styles.description}>{file.title}</Text>
 
-                        {video.hashtags && video.hashtags.length > 0 && (
+                       
                             <View style={styles.hashtagContainer}>
-                                {video.hashtags.map((hashtag, index) => (
-                                    <Text key={index} style={styles.hashtag}>
-                                        #{hashtag}
+                                
+                                    <Text  style={styles.hashtag}>
+                                        #{file.prompt}
                                     </Text>
-                                ))}
+                             
                             </View>
-                        )}
+                     
                     </View>
 
                     <BottomFeature
@@ -98,6 +98,8 @@ const Fullmain = ({ file , isActive , index}) => {
         leftContent: {
             flex: 1,
             paddingRight: 15,
+            alignSelf:'flex-end',
+            paddingBottom:20
         },
         userInfo: {
             flexDirection: 'row',
