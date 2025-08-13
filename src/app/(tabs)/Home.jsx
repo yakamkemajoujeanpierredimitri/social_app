@@ -115,31 +115,23 @@ const HomePage = () => {
             />
          )}
         keyExtractor={(item) => item._id}
-        pagingEnabled
-        showsVerticalScrollIndicator={false}
-        snapToInterval={SCREEN_HEIGHT}
         snapToAlignment="start"
         decelerationRate="fast"
         onViewableItemsChanged={onViewableItemsChanged}
-         initialNumToRender={1}
-        maxToRenderPerBatch={1}
-        windowSize={3}
         viewabilityConfig={viewabilityConfig}
         refreshControl={
           <RefreshControl refreshing={state.refreshing} onRefresh={handleRefresh} />
         }
-        getItemLayout={(data, index) => ({
-          length: SCREEN_HEIGHT,
-          offset: SCREEN_HEIGHT * index,
-          index,
-        })}
-        ListEmptyComponent={()=>(<LottieView
+      ListEmptyComponent={()=>(<LottieView
       source={require('../../assets/animation/load2.json')}
       autoPlay
       loop
       resizeMode='cover'
       style={styles.anim}
       />)}
+      initialNumToRender={1}
+      maxToRenderPerBatch={1}
+        windowSize={3}
       />}
     </View>
   );

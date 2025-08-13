@@ -17,27 +17,32 @@ const BottomFeature = ({ file, isActive, index }) => {
   const [isLiked, setIsLiked] = useState( false);
   const [likeCount, setLikeCount] = useState( 0);
   const [saves, setSaves] = useState(0);
+  const [issave ,setIssave] = useState(false);
   const { state: authState ,dispatch} = useFile();
 //  console.log(file);
 useEffect(()=>{
-    const paly = async ()=>{
-        await FileService.getObservation(file._id);
+    if(isActive){
+      paly();
+      console.log(file._id);
     }
-paly();
-},[]);
+
+},[isActive]);
 useEffect(()=>{
     setLikeCount(authState.likes);
     setSaves(authState.saves);
 
 },[authState.likes, authState.saves])
-
+   const paly = async ()=>{
+        await FileService.getObservation( dispatch , file._id);
+    }
   const handleLike = async () => {
     const newLikedState = !isLiked;
-    await FileService.addObservation(dispatch,file._id,{likes:1});
-    setIsLiked(newLikedState);
+    // await FileService.addObservation(dispatch,file._id,{likes:1});
+    setIsLiked(true);
   };
     const handleSave = async () => {
-    await FileService.addObservation(dispatch, file._id,{save:1});
+    //await FileService.addObservation(dispatch, file._id,{save:1});
+    setIssave(true);
   };
 
  
@@ -56,7 +61,7 @@ useEffect(()=>{
   
         
         <View style={styles.rightContent}>
-          <TouchableOpacity style={styles.actionButton} onPress={()=>handleLike}>
+          <TouchableOpacity style={styles.actionButton} onPress={()=>handleLike()}>
             <Icon
               name={isLiked ? 'heart' : 'heart-outline'}
               size={28}
@@ -74,8 +79,10 @@ useEffect(()=>{
             <Icon name="share-outline" size={28} color="#fff" />
             <Text style={styles.actionText}>{ 0}</Text>
           </TouchableOpacity>
-  <TouchableOpacity style={styles.actionButton} onPress={()=>handleSave}>
-            <Icon name="mark" size={28} color="#fff" />
+  <TouchableOpacity style={styles.actionButton} onPress={()=>handleSave()}>
+            <Icon name={
+               !issave ? 'bookmark-outline' : "bookmark"
+            } size={28} color="#fff" />
             <Text style={styles.actionText}>{saves}</Text>
           </TouchableOpacity>
            <TouchableOpacity style={styles.actionButton} >
@@ -83,7 +90,7 @@ useEffect(()=>{
             <Text style={styles.actionText}>{authState.view}</Text>
           </TouchableOpacity>
           {/* Spinning disc for music */}
-          {file.thumbnail && (
+          {file.music && (
             <View style={styles.musicDisc}>
               <Image
                 source={{ uri: file.thumbnail }}
@@ -97,80 +104,13 @@ useEffect(()=>{
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    position: 'relative',
-  },
-  overlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    paddingHorizontal: 15,
-    paddingBottom: 50,
-    background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
-  },
-  leftContent: {
-    flex: 1,
-    paddingRight: 15,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  userDetails: {
-    marginLeft: 10,
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  username: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  followButton: {
-    marginLeft: 10,
-    backgroundColor: '#fe2c55',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 15,
-  },
-  followText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  description: {
-    color: '#fff',
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 8,
-  },
-  hashtagContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  hashtag: {
-    color: '#fe2c55',
-    fontSize: 14,
-    marginRight: 8,
-    marginBottom: 4,
-  },
+
   rightContent: {
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    width: 60,
+    justifyContent: "space-around",
+    width: "100%",
+    flexDirection:'row',
+    marginTop:10
     
   },
   actionButton: {

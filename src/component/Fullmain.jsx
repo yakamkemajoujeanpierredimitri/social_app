@@ -31,13 +31,20 @@ const Fullmain = ({ file , isActive , index}) => {
                         <VideoPlayer
                             videoUri={file.path}
                             isActive={isActive}
+                            pic={file.thumbnail}
                         /> :
                         <Image
                             source={{ uri: file.thumbnail }}
+                            style={styles.image}
                         />
                 }
 
                 {/* Video Info Overlay */}
+                <BottomFeature
+                        file={file}
+                        isActive={isActive}
+                        index={index}
+                    />
                 <View style={styles.overlay}>
                     {/* Left side - User info and description */}
                     <View style={styles.leftContent}>
@@ -69,12 +76,9 @@ const Fullmain = ({ file , isActive , index}) => {
                      
                     </View>
 
-                    <BottomFeature
-                        file={file}
-                        isActive={isActive}
-                        index={index}
-                    />
-                </View>
+                   
+                </View> 
+                
             </View>
         );
     };
@@ -83,15 +87,15 @@ const Fullmain = ({ file , isActive , index}) => {
         container: {
             width: SCREEN_WIDTH,
             height: SCREEN_HEIGHT,
-            position: 'relative',
+           flexDirection:"column",
+           justifyContent:"center",
+           padding:10,
+           flexDirection:"column"
+
         },
         overlay: {
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
             flexDirection: 'row',
-            paddingHorizontal: 15,
+            paddingHorizontal: 10,
             paddingBottom: 50,
             background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
         },
@@ -99,7 +103,6 @@ const Fullmain = ({ file , isActive , index}) => {
             flex: 1,
             paddingRight: 15,
             alignSelf:'flex-end',
-            paddingBottom:20
         },
         userInfo: {
             flexDirection: 'row',
@@ -147,39 +150,18 @@ const Fullmain = ({ file , isActive , index}) => {
             flexWrap: 'wrap',
         },
         hashtag: {
-            color: '#fe2c55',
+            color: '#e6ecede2',
             fontSize: 14,
             marginRight: 8,
             marginBottom: 4,
         },
-        rightContent: {
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            width: 60,
-        },
-        actionButton: {
-            alignItems: 'center',
-            marginBottom: 20,
-        },
-        actionText: {
-            color: '#fff',
-            fontSize: 12,
-            marginTop: 4,
-        },
-        musicDisc: {
-            width: 50,
-            height: 50,
-            borderRadius: 25,
-            backgroundColor: '#333',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 10,
-        },
-        musicCover: {
-            width: 35,
-            height: 35,
-            borderRadius: 17.5,
-        },
+      image:{
+        objectFit:"contain",
+        width:"100%",
+        height:420,
+        marginBottom:10,
+        borderRadius:10
+      }
     });
 
     export default Fullmain

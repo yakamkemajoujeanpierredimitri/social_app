@@ -110,6 +110,7 @@ const FileService = {
                 type: 'SET_PROP',
                 payload: res.data
             });
+           // console.log(res.data);
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'File retrieval failed';
             return { msg: errorMessage };
@@ -120,7 +121,7 @@ const FileService = {
         
         dispatch({
             type: "FETCH_VIDEO_START"
-        })
+        });
         try {
             const res = await apiClient.get(`/user/observe?app=true&&max=${currentPage || 1}`);
             dispatch({

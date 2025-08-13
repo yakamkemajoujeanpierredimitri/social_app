@@ -1,16 +1,16 @@
 import { Audio } from 'expo-av';
-import { Camera } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import { useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useFile } from '../../context/fileProvider';
@@ -19,32 +19,39 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const CameraScreen = () => {
   const { dispatch } = useFile();
-  const [hasPermission, setHasPermission] = useState(null);
-  const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
+  const [permission, requestPermission] = useCameraPermissions();
+  const [cameraType, setCameraType] = useState('back');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
-  const [permentvideo, setPermentvideo] = useState(null);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
+  const [hasAudioPermission, setHasAudioPermission] = useState(null);
+  const [hasMediaPermission, setHasMediaPermission] = useState(null);
   const cameraRef = useRef(null);
   const recordingTimer = useRef(null);
-const router = useRouter();
+  const router = useRouter();
+
   useEffect(() => {
     (async () => {
-      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
       const { status: audioStatus } = await Audio.requestPermissionsAsync();
       const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
       
-      setHasPermission(
-        cameraStatus === 'granted' && 
-        audioStatus === 'granted' && 
-        mediaStatus === 'granted'
-      );
+      setHasAudioPermission(audioStatus === 'granted');
+      setHasMediaPermission(mediaStatus === 'granted');
     })();
   }, []);
 
+  // Cleanup timer on component unmount
+  useEffect(() => {
+    return () => {
+      if (recordingTimer.current) {
+        clearInterval(recordingTimer.current);
+      }
+    };
+  }, []);
+
   const startRecording = async () => {
-    if (cameraRef.current) {
+    if (cameraRef.current && isCameraReady) {
       try {
         setIsRecording(true);
         setRecordingDuration(0);
@@ -52,15 +59,16 @@ const router = useRouter();
         recordingTimer.current = setInterval(() => {
           setRecordingDuration((prev) => prev + 1);
         }, 1000);
+
+        // Start recording (the video will be handled in stopRecording)
         const video = await cameraRef.current.recordAsync({
-          quality: Camera.Constants.VideoQuality['720p'],
           maxDuration: 60, // 60 seconds max
         });
-
-        setPermentvideo(video);
       } catch (error) {
         console.error('Recording failed:', error);
-        Alert.alert('Error', 'Failed to record video');
+        Alert.alert('Error', 'Failed to start recording');
+        setIsRecording(false);
+        clearInterval(recordingTimer.current);
       }
     }
   };
@@ -71,14 +79,22 @@ const router = useRouter();
         setIsRecording(false);
         clearInterval(recordingTimer.current);
         
-        await cameraRef.current.stopRecording();
-        dispatch({
-          type: 'SET_RECORD_FILE',
-          payload: { file: permentvideo }
-        });
-        router.navigate('/add');
+        // Stop recording and get the video file
+        const video = await cameraRef.current.stopRecording();
+        
+        if (video) {
+          // Optional: Save to media library
+          await MediaLibrary.saveToLibraryAsync(video.uri);
+          
+          dispatch({
+            type: 'SET_RECORD_FILE',
+            payload: { file: video }
+          });
+          router.navigate('/add');
+        }
       } catch (error) {
         console.error('Stop recording failed:', error);
+        Alert.alert('Error', 'Failed to stop recording');
       }
     }
   };
@@ -87,8 +103,8 @@ const router = useRouter();
     if (cameraRef.current && isCameraReady) {
       try {
         const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.7,
-          base64: true,
+          quality: 1,
+          base64: true, // Set to false to improve performance unless you specifically need base64
         });
         
         setCapturedPhoto(photo);
@@ -100,7 +116,6 @@ const router = useRouter();
         // Optional: Save to media library
         await MediaLibrary.saveToLibraryAsync(photo.uri);
         router.navigate('/add');
-       // Alert.alert('Success', 'Photo captured successfully!');
       } catch (error) {
         console.error('Error taking picture:', error);
         Alert.alert('Error', 'Failed to capture photo');
@@ -110,9 +125,9 @@ const router = useRouter();
 
   const toggleCameraType = () => {
     setCameraType(
-      cameraType === Camera.Constants.Type.back
-        ? Camera.Constants.Type.front
-        : Camera.Constants.Type.back
+      cameraType === 'back'
+        ? 'front'
+        : 'back'
     );
   };
 
@@ -120,7 +135,16 @@ const router = useRouter();
     setIsCameraReady(true);
   };
 
-  if (hasPermission === null) {
+  const handleGoBack = () => {
+    // Stop recording if in progress before going back
+    if (isRecording) {
+      stopRecording();
+    } else {
+      router.back();
+    }
+  };
+
+  if (!permission) {
     return (
       <View style={styles.loadingContainer}>
         <LottieView
@@ -134,76 +158,106 @@ const router = useRouter();
     );
   }
 
-  if (hasPermission === false) {
+  if (!permission.granted || !hasAudioPermission || !hasMediaPermission) {
     return (
       <View style={styles.permissionContainer}>
         <Text style={styles.permissionText}>
           Camera, microphone, and media library access required
         </Text>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={() => {
+            if (!permission.granted) {
+              requestPermission();
+            }
+            // Re-request other permissions
+            (async () => {
+              const { status: audioStatus } = await Audio.requestPermissionsAsync();
+              const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
+              
+              setHasAudioPermission(audioStatus === 'granted');
+              setHasMediaPermission(mediaStatus === 'granted');
+            })();
+          }}
+        >
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Camera
+      <CameraView
         ref={cameraRef}
         style={styles.camera}
-        type={cameraType}
-        ratio="16:9"
+        facing={cameraType}
+        mode="video"
         onCameraReady={handleCameraReady}
-      >
-        {/* Header */}
-        <View style={styles.header}>
+      />
+      
+      {/* Header Overlay */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={handleGoBack}
+        >
+          <Icon name="close" size={24} color="#fff" />
+        </TouchableOpacity>
+        
+        {isRecording && (
+          <View style={styles.timerContainer}>
+            <View style={styles.recordingDot} />
+            <Text style={styles.timerText}>
+              {Math.floor(recordingDuration / 60)}:
+              {(recordingDuration % 60).toString().padStart(2, '0')}
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={toggleCameraType}
+          disabled={isRecording} // Disable camera flip during recording
+        >
+          <Icon name="camera-reverse" size={24} color={isRecording ? "#666" : "#fff"} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Recording Controls Overlay */}
+      <View style={styles.controls}>
+        <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => navigation.goBack()}
+            style={[
+              styles.captureButton,
+              isRecording && styles.disabledButton
+            ]}
+            onPress={takePicture}
+            disabled={isRecording || !isCameraReady}
           >
-            <Icon name="close" size={24} color="#fff" />
+            <Icon name="camera" size={24} color={isRecording ? "#666" : "#fff"} />
           </TouchableOpacity>
           
-          {isRecording && (
-            <View style={styles.timerContainer}>
-              <Text style={styles.timerText}>
-                {Math.floor(recordingDuration / 60)}:
-                {(recordingDuration % 60).toString().padStart(2, '0')}
-              </Text>
-            </View>
-          )}
-
           <TouchableOpacity
-            style={styles.headerButton}
-            onPress={toggleCameraType}
+            style={[
+              styles.recordButton,
+              isRecording && styles.recordingButton,
+              !isCameraReady && styles.disabledButton
+            ]}
+            onPress={isRecording ? stopRecording : startRecording}
+            disabled={!isCameraReady}
           >
-            <Icon name="camera-reverse" size={24} color="#fff" />
+            {isRecording ? (
+              <View style={styles.recordingIndicator} />
+            ) : (
+              <View style={styles.recordDot} />
+            )}
           </TouchableOpacity>
+          
+          {/* Placeholder for symmetry */}
+          <View style={styles.captureButton} />
         </View>
-
-        {/* Recording Controls */}
-        <View style={styles.controls}>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.captureButton}
-              onPress={takePicture}
-              disabled={isRecording}
-            >
-              <Icon name="camera" size={24} color="#fff" />
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.recordButton,
-                isRecording && styles.recordingButton,
-              ]}
-              onPress={isRecording ? stopRecording : startRecording}
-            >
-              {isRecording && (
-                <View style={styles.recordingIndicator} />
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Camera>
+      </View>
     </View>
   );
 };
@@ -242,6 +296,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     fontSize: 18,
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#fe2c55',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   header: {
     flexDirection: 'row',
@@ -257,10 +323,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timerContainer: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
+  },
+  recordingDot: {
+    width: 8,
+    height: 8,
+    backgroundColor: '#ff0000',
+    borderRadius: 4,
+    marginRight: 8,
   },
   timerText: {
     color: '#fff',
@@ -277,8 +352,9 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     width: '80%',
+    paddingHorizontal: 20,
   },
   captureButton: {
     width: 60,
@@ -292,14 +368,14 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#fe2c55',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
     borderColor: '#fff',
   },
   recordingButton: {
-    backgroundColor: '#ff0000',
+    backgroundColor: 'rgba(255, 0, 0, 0.8)',
     transform: [{ scale: 1.1 }],
   },
   recordingIndicator: {
@@ -308,6 +384,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 4,
   },
+  recordDot: {
+    width: 20,
+    height: 20,
+    backgroundColor: '#fe2c55',
+    borderRadius: 10,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
 });
-
-export default CameraScreen;
+export  default CameraScreen;

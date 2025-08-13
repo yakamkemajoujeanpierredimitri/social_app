@@ -1,7 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import React from "react";
-
+import { TouchableOpacity } from "react-native";
+const AddBtn = ()=>{
+    const router = useRouter();
+    return(
+        <TouchableOpacity  style={{margin:10, height:200 , width:200}} onPress={()=>router.navigate('/add')} >
+        <Ionicons 
+        name="add"
+        color={"#ffd700"}
+        size='large'
+        /></TouchableOpacity>
+    )
+}
 const Tablayout = React.memo(() => (
     <Tabs
     
@@ -33,7 +44,9 @@ const Tablayout = React.memo(() => (
                 borderTopColor: "#FFD700",      // yellow border
             },
             headerShown: false,
+            headerLeft:()=><AddBtn/>
         })}
+        
     >
         <Tabs.Screen name="Home"  />
         <Tabs.Screen name="Search" />
