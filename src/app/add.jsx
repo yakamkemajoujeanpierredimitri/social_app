@@ -23,11 +23,11 @@ const CreatePostScreen = () => {
   const {state}= useFile();
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState('');
-  const [media, setMedia] = useState(null);
+  const [media, setMedia] = useState(state.recordfile);
   const [mediaType, setMediaType] = useState(null); // 'image' or 'video'
   const [status, setStatus] = useState({});
   const videoRef = useRef(null);
-  const player = useVideoPlayer(null);
+  const player  = useVideoPlayer(media);
  const [uploadProgress, setUploadProgress] = useState(0);
   // Request media library permissions
   useEffect(() => {
@@ -37,6 +37,7 @@ const CreatePostScreen = () => {
         Alert.alert('Permission required', 'We need access to your media library to select photos/videos');
       }
     })();
+    console.log(state.recordfile);
     if (state.recordfile) {
         setMedia(state.recordfile);
         setMediaType(state.recordfile.type);
@@ -44,9 +45,10 @@ const CreatePostScreen = () => {
   }, []);
     useEffect(() => {
     if (mediaType === 'video' && media) {
-      player.source = { uri: media.uri };
-      player.isLooping = false;
+      //player.source = {uri:media.uri} ;
+        player.isLooping = true;
       player.play();
+      
     }
   }, [media, mediaType]);
 
@@ -59,7 +61,6 @@ const CreatePostScreen = () => {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
-        aspect: [4, 3],
         quality: 1,
       });
 
@@ -162,6 +163,7 @@ const CreatePostScreen = () => {
                  player={player}
                  allowsFullscreen
                  allowsPictureInPicture
+                 nativeControls
                 />
               )}
               <TouchableOpacity onPress={removeMedia} style={styles.removeMediaButton}>
@@ -203,6 +205,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    padding:20
   },
   scrollContainer: {
     paddingBottom: 30,

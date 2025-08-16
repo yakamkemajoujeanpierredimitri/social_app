@@ -21,6 +21,7 @@ const CameraScreen = () => {
   const { dispatch } = useFile();
   const [permission, requestPermission] = useCameraPermissions();
   const [cameraType, setCameraType] = useState('back');
+  const [cameraMode,setCameraMode] = useState('video');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
@@ -51,6 +52,7 @@ const CameraScreen = () => {
   }, []);
 
   const startRecording = async () => {
+    setCameraMode('video');
     if (cameraRef.current && isCameraReady) {
       try {
         setIsRecording(true);
@@ -64,6 +66,13 @@ const CameraScreen = () => {
         const video = await cameraRef.current.recordAsync({
           maxDuration: 60, // 60 seconds max
         });
+          const name  = video.uri.split('/');
+           dispatch({
+            type: 'SET_RECORD_FILE',
+            payload: { file: {uri:video.uri, type:'video' ,fileName:name[name.length - 1]} }
+          });
+          //await MediaLibrary.saveToLibraryAsync(video.uri);
+        //return video;
       } catch (error) {
         console.error('Recording failed:', error);
         Alert.alert('Error', 'Failed to start recording');
@@ -80,18 +89,12 @@ const CameraScreen = () => {
         clearInterval(recordingTimer.current);
         
         // Stop recording and get the video file
-        const video = await cameraRef.current.stopRecording();
+         await cameraRef.current.stopRecording();
         
-        if (video) {
           // Optional: Save to media library
-          await MediaLibrary.saveToLibraryAsync(video.uri);
           
-          dispatch({
-            type: 'SET_RECORD_FILE',
-            payload: { file: video }
-          });
           router.navigate('/add');
-        }
+        
       } catch (error) {
         console.error('Stop recording failed:', error);
         Alert.alert('Error', 'Failed to stop recording');
@@ -100,11 +103,12 @@ const CameraScreen = () => {
   };
 
   const takePicture = async () => {
+    setCameraMode('picture');
     if (cameraRef.current && isCameraReady) {
       try {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 1,
-          base64: true, // Set to false to improve performance unless you specifically need base64
+          base64:false, // Set to false to improve performance unless you specifically need base64
         });
         
         setCapturedPhoto(photo);
@@ -192,7 +196,7 @@ const CameraScreen = () => {
         ref={cameraRef}
         style={styles.camera}
         facing={cameraType}
-        mode="video"
+        mode={cameraMode}
         onCameraReady={handleCameraReady}
       />
       

@@ -1,4 +1,3 @@
-import { useAuth } from "../context/authProvider";
 import apiClient from "./apiClient";
 
 const UserService = {
@@ -12,13 +11,8 @@ const UserService = {
         }
     },
 userUpdate: async (data)=>{
-    const {dispatch} = useAuth();
         try {
             const res  = await apiClient.put(`/user?app=true`,data);
-            dispatch({
-                types:'SET_USER',
-                payload:{user:res.data}
-            })
             return {data:res.data}
         } catch (error) {
             const errorMessage = error.response?.data?.message || "failed to fech users";
@@ -26,15 +20,10 @@ userUpdate: async (data)=>{
         }
     },
 userAvatar:async (data)=>{
-    const {dispatch} = useAuth();
         try {
             const res  = await apiClient.put(`/user/avatar?app=true`,data,
                 {headers:{'Content-Type': 'multipart/form-data',}}
             );
-            dispatch({
-                types:'SET_USER',
-                payload:{user:res.data}
-            })
             return {data:res.data}
         } catch (error) {
             const errorMessage = error.response?.data?.message || "failed to fech users";
@@ -71,7 +60,8 @@ userAvatar:async (data)=>{
     savePosts:async()=>{
         try {
             const res = await apiClient.get(`/user/saves?app=true`);
-           return  {data : res.data};
+           // console.log(res.data);
+           return  {data : res.data[0].saves};
         } catch (error) {
                const errorMessage = error.response?.data?.message || "failed to fech users";
             return { msg : errorMessage};
