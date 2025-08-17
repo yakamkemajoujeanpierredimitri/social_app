@@ -52,13 +52,14 @@ const HomePage = () => {
       n = JSON.parse(n)|| 1;
       setCurrentpage(n);
       }
+      //console.log(res.data);
       setCurrentpage(state.currentPage);
       if (state.error) {
         Alert.alert('error',state.error);
         return;
       }
       setPost(res.data);
-      console.log(res.data);
+     // console.log(res.data);
       console.log(currentpage);
     };
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {

@@ -83,7 +83,7 @@ const LoginScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.registerLink}
-          onPress={() => navigation.navigate('Register')}
+          onPress={() => router.navigate('/auth/signup')}
         >
           <Text style={styles.registerText}>
             Don't have an account? Sign up

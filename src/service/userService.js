@@ -102,6 +102,6 @@ userAvatar:async (data)=>{
                const errorMessage = error.response?.data?.message || "failed to fech users";
             return { msg : errorMessage};
         }
-    },
+    }
 };
 export default UserService;

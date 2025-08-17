@@ -10,42 +10,44 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useFile } from '../context/fileProvider';
 import FileService from '../service/fileService';
+import CommentModal from './CommentModal';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const BottomFeature = ({ file, isActive, index }) => {
-  const [isLiked, setIsLiked] = useState( false);
-  const [likeCount, setLikeCount] = useState( 0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [saves, setSaves] = useState(0);
-  const [issave ,setIssave] = useState(false);
-  const { state: authState ,dispatch} = useFile();
-//  console.log(file);
-useEffect(()=>{
-    if(isActive){
+  const [issave, setIssave] = useState(false);
+  const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
+  const { state: authState, dispatch } = useFile();
+
+  useEffect(() => {
+    if (isActive) {
       paly();
       console.log(file._id);
     }
+  }, [isActive]);
 
-},[isActive]);
-useEffect(()=>{
+  useEffect(() => {
     setLikeCount(authState.likes);
     setSaves(authState.saves);
+  }, [authState.likes, authState.saves]);
 
-},[authState.likes, authState.saves])
-   const paly = async ()=>{
-        await FileService.getObservation( dispatch , file._id);
-    }
+  const paly = async () => {
+    await FileService.getObservation(dispatch, file._id);
+  };
+
   const handleLike = async () => {
     const newLikedState = !isLiked;
     // await FileService.addObservation(dispatch,file._id,{likes:1});
     setIsLiked(true);
   };
-    const handleSave = async () => {
+
+  const handleSave = async () => {
     //await FileService.addObservation(dispatch, file._id,{save:1});
     setIssave(true);
   };
-
- 
 
   const handleShare = () => {
     // Implement share functionality
@@ -53,53 +55,56 @@ useEffect(()=>{
   };
 
   const handleComment = () => {
-    // Navigate to comments screen
-    console.log('Open comments for video:' );
+    setIsCommentModalVisible(true);
   };
 
   return (
-  
-        
-        <View style={styles.rightContent}>
-          <TouchableOpacity style={styles.actionButton} onPress={()=>handleLike()}>
-            <Icon
-              name={isLiked ? 'heart' : 'heart-outline'}
-              size={28}
-              color={isLiked ? '#fe2c55' : '#fff'}
+    <>
+      <View style={styles.rightContent}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => handleLike()}>
+          <Icon
+            name={isLiked ? 'heart' : 'heart-outline'}
+            size={28}
+            color={isLiked ? '#fe2c55' : '#fff'}
+          />
+          <Text style={styles.actionText}>{likeCount}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton} onPress={handleComment}>
+          <Icon name="chatbubble-outline" size={28} color="#fff" />
+          <Text style={styles.actionText}>{0}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
+          <Icon name="share-outline" size={28} color="#fff" />
+          <Text style={styles.actionText}>{0}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton} onPress={() => handleSave()}>
+          <Icon name={!issave ? 'bookmark-outline' : 'bookmark'} size={28} color="#fff" />
+          <Text style={styles.actionText}>{saves}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton}>
+          <Icon name="eye" size={28} color="#fff" />
+          <Text style={styles.actionText}>{authState.view}</Text>
+        </TouchableOpacity>
+
+        {file.music && (
+          <View style={styles.musicDisc}>
+            <Image
+              source={{ uri: file.thumbnail }}
+              style={styles.musicCover}
             />
-            <Text style={styles.actionText}>{likeCount}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton} onPress={handleComment}>
-            <Icon name="chatbubble-outline" size={28} color="#fff" />
-            <Text style={styles.actionText}>{ 0}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-            <Icon name="share-outline" size={28} color="#fff" />
-            <Text style={styles.actionText}>{ 0}</Text>
-          </TouchableOpacity>
-  <TouchableOpacity style={styles.actionButton} onPress={()=>handleSave()}>
-            <Icon name={
-               !issave ? 'bookmark-outline' : "bookmark"
-            } size={28} color="#fff" />
-            <Text style={styles.actionText}>{saves}</Text>
-          </TouchableOpacity>
-           <TouchableOpacity style={styles.actionButton} >
-            <Icon name="eye" size={28} color="#fff" />
-            <Text style={styles.actionText}>{authState.view}</Text>
-          </TouchableOpacity>
-          {/* Spinning disc for music */}
-          {file.music && (
-            <View style={styles.musicDisc}>
-              <Image
-                source={{ uri: file.thumbnail }}
-                style={styles.musicCover}
-              />
-            </View>
-          )}
-        </View>
-   
+          </View>
+        )}
+      </View>
+      <CommentModal
+        isVisible={isCommentModalVisible}
+        onClose={() => setIsCommentModalVisible(false)}
+        file={file}
+      />
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import React from "react";
 import { TouchableOpacity } from "react-native";
@@ -32,6 +32,8 @@ const Tablayout = React.memo(() => (
                     case "Profile":
                         iconName = focused ? "user" : "user";
                         break;
+                    case "Message":
+                        return <Ionicons name={focused ? "chatbubble-ellipses" : "chatbubble-ellipses-outline"} size={size} color={color} />;
                     default:
                         iconName = "ellipse";
                 }
@@ -52,10 +54,11 @@ const Tablayout = React.memo(() => (
         })}
         
     >
-        <Tabs.Screen name="Home" options={{headerShown:false}} />
+        <Tabs.Screen name="Home"  />
         <Tabs.Screen name="Search" />
         <Tabs.Screen name="Camera" />
         <Tabs.Screen name="Profile"  />
+        <Tabs.Screen name="Message" options={{ headerShown: true }} />
     </Tabs>
 ));
 

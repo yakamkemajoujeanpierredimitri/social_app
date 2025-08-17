@@ -2,6 +2,7 @@
 import { AntDesign } from "@expo/vector-icons";
 import { Video } from "expo-av";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -16,6 +17,7 @@ import { useFile } from "../../context/fileProvider";
 import FileService from "../../service/fileService";
 
 const Search = () => {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,7 +52,7 @@ const Search = () => {
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.itemContainer}
-      //onPress={() => router.push(`/post/${item._id}`)}
+      onPress={() => router.navigate(`/watch/${item._id}`)}
     >
       {item.path ? (
         <Video

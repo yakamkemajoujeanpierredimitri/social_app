@@ -1,9 +1,9 @@
 import apiClient from "./apiClient";
 
 const ChatService = {
-sendChat : async (data)=>{
+sendChat : async (id ,data)=>{
     try {
-        const res = await apiClient.post("/message?app=true",data,{
+        const res = await apiClient.post(`/message/${id}?app=true`,data,{
             headers:{'Content-Type': 'multipart/form-data'}
         });
         return {data:res.data};
@@ -33,7 +33,16 @@ deleteChat:async (id)=>{
         return {msg:errorMessage};
     }
 },
-
+Lastmessage:async ()=>{
+    try {
+        const res = await apiClient.get(`/message/last?app=true`);
+        return {data:res.data};
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || 'File upload failed';
+        console.error( errorMessage);
+        return {msg:errorMessage};
+    }
+},
 
 }
 export default ChatService;
