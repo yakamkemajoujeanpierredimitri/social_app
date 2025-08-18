@@ -1,6 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Image, LayoutAnimation, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
+import UserList from '../../component/UserList';
 import { useAuth } from '../../context/authProvider';
 import UserService from '../../service/userService';
 
@@ -15,9 +16,12 @@ const Profile = () => {
   const { state, dispatch } = useAuth();
   const { user } = state;
 
-  const [followers, setFollowers] = useState(0);
-  const [following, setFollowing] = useState(0);
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [userList, setUserList] = useState([]);
+  const [userListTitle, setUserListTitle] = useState('');
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [newName, setNewName] = useState(user?.name || '');
   const [newAvatar, setNewAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -30,11 +34,11 @@ const Profile = () => {
     const fetchFollowData = async () => {
       const followersRes = await UserService.getFollowers();
       if (followersRes.data) {
-        setFollowers(followersRes.data.length);
+        setFollowers(followersRes.data);
       }
       const followingRes = await UserService.getFollowing();
       if (followingRes.data) {
-        setFollowing(followingRes.data.length);
+        setFollowing(followingRes.data);
       }
     };
 
@@ -108,6 +112,18 @@ const Profile = () => {
     setActiveTab(tab);
   };
 
+  const showFollowers = () => {
+    setUserList(followers);
+    setUserListTitle('Followers');
+    setModalVisible(true);
+  };
+
+  const showFollowing = () => {
+    setUserList(following);
+    setUserListTitle('Following');
+    setModalVisible(true);
+  };
+
   const renderPostItem = ({ item }) => (
     <View style={styles.postItem}>
     
@@ -126,16 +142,16 @@ const Profile = () => {
         <Image source={{ uri: user?.avatar || 'https://via.placeholder.com/150' }} style={styles.avatar} />
         <Text style={styles.name}>{user?.name}</Text>
         <View style={styles.statsContainer}>
-          <View style={styles.stat}>
-            <Text style={styles.statNumber}>{followers}</Text>
+          <TouchableOpacity style={styles.stat} onPress={showFollowers}>
+            <Text style={styles.statNumber}>{followers.length}</Text>
             <Text style={styles.statLabel}>Followers</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statNumber}>{following}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.stat} onPress={showFollowing}>
+            <Text style={styles.statNumber}>{following.length}</Text>
             <Text style={styles.statLabel}>Following</Text>
-          </View>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
@@ -175,6 +191,20 @@ const Profile = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{userListTitle}</Text>
+            <UserList users={userList} onClose={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Edit Profile</Text>
             <TouchableOpacity onPress={pickImage}>
               <Image source={{ uri: newAvatar?.uri || user?.avatar || 'https://via.placeholder.com/150' }} style={styles.modalAvatar} />
@@ -188,7 +218,7 @@ const Profile = () => {
               onChangeText={setNewName}
             />
             <View style={styles.modalButtons}>
-              <Button title="Cancel" onPress={() => setModalVisible(false)} color="#000" />
+              <Button title="Cancel" onPress={() => setEditModalVisible(false)} color="#000" />
               <Button title="Save" onPress={handleUpdateProfile} disabled={loading} color="#FFD700" />
             </View>
             {loading && <ActivityIndicator size="large" color="#FFD700" style={styles.loadingIndicator} />}
@@ -298,7 +328,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   modalContent: {
-    width: '80%',
+    width: '100%',
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,

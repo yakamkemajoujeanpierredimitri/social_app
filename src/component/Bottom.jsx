@@ -20,6 +20,7 @@ const BottomFeature = ({ file, isActive, index }) => {
   const [saves, setSaves] = useState(0);
   const [issave, setIssave] = useState(false);
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
+  const [countcomm , setComments] = useState(0);
   const { state: authState, dispatch } = useFile();
 
   useEffect(() => {
@@ -72,7 +73,7 @@ const BottomFeature = ({ file, isActive, index }) => {
 
         <TouchableOpacity style={styles.actionButton} onPress={handleComment}>
           <Icon name="chatbubble-outline" size={28} color="#fff" />
-          <Text style={styles.actionText}>{0}</Text>
+          <Text style={styles.actionText}>{countcomm}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
@@ -103,6 +104,7 @@ const BottomFeature = ({ file, isActive, index }) => {
         isVisible={isCommentModalVisible}
         onClose={() => setIsCommentModalVisible(false)}
         file={file}
+        setnum={setComments}
       />
     </>
   );

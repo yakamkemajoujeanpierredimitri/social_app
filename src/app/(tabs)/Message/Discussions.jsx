@@ -1,21 +1,24 @@
 import { useRouter } from 'expo-router';
+import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import MessageSkeleton from '../../../component/MessageSkeleton';
 import { useAuth } from '../../../context/authProvider';
 import ChatService from '../../../service/chatService';
 
 const DiscussionsScreen = () => {
-  const { state , dispatch} = useAuth();
+  const { state, dispatch } = useAuth();
   const [recentChats, setRecentChats] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const fetchRecentChats = async () => {
       const res = await ChatService.Lastmessage();
-      console.log(res.data);
       if (res.data) {
         setRecentChats(res.data);
       }
+      setIsLoading(false);
     };
     fetchRecentChats();
   }, []);
@@ -25,22 +28,47 @@ const DiscussionsScreen = () => {
     router.push(`/Message/${chat._id}`);
   };
 
+  const formatTimestamp = (timestamp) => {
+    const now = moment();
+    const postTime = moment(timestamp);
+    const diffSeconds = now.diff(postTime, 'seconds');
+    const diffMinutes = now.diff(postTime, 'minutes');
+    const diffHours = now.diff(postTime, 'hours');
+    const diffDays = now.diff(postTime, 'days');
+
+    if (diffSeconds < 60) {
+      return `${diffSeconds}s`;
+    } else if (diffMinutes < 60) {
+      return `${diffMinutes}m`;
+    } else if (diffHours < 24) {
+      return `${diffHours}h`;
+    } else if (diffDays < 7) {
+      return `${diffDays}d`;
+    } else {
+      return postTime.format('MMM D');
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <FlatList
-        data={recentChats}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.chatItem} onPress={() => handleChatPress(item.sender?._id === state.user?._id ? item.receiver :item.sender )}>
-            <Image source={ item.sender?._id === state.user?._id ? { uri: item.receiver.avatar} :{ uri: item.sender.avatar}} style={styles.profileImage} />
-            <View style={styles.chatInfo}>
-              <Text style={styles.profileName}>{item.sender?._id === state.user?._id ? item.receiver.name : item.sender.name}</Text>
-              <Text style={styles.lastMessage}>{item.content|| "image..."}</Text>
-            </View>
-            <Text style={styles.timestamp}>{new Date(item.createdAt).toLocaleTimeString()}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      {isLoading ? (
+        <MessageSkeleton />
+      ) : (
+        <FlatList
+          data={recentChats}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.chatItem} onPress={() => handleChatPress(item.sender?._id === state.user?._id ? item.receiver : item.sender)}>
+              <Image source={item.sender?._id === state.user?._id ? { uri: item.receiver.avatar } : { uri: item.sender.avatar }} style={styles.profileImage} />
+              <View style={styles.chatInfo}>
+                <Text style={styles.profileName}>{item.sender?._id === state.user?._id ? item.receiver.name : item.sender.name}</Text>
+                <Text style={styles.lastMessage}>{item.content || "image..."}</Text>
+              </View>
+              <Text style={styles.timestamp}>{formatTimestamp(item.createdAt)}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 };

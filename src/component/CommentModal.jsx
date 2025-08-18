@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../context/authProvider';
 import CommService from '../service/comService';
 
-const CommentModal = ({ isVisible, onClose, file }) => {
+const CommentModal = ({ isVisible, onClose, file ,setnum }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
-
+  const {state} = useAuth();
   useEffect(() => {
     if (isVisible) {
       fetchComments();
@@ -17,12 +18,16 @@ const CommentModal = ({ isVisible, onClose, file }) => {
     const res = await CommService.getComm(file._id);
     if (res.data) {
       setComments(res.data);
+      setnum(res.data.length);
+      console.log(res.data.length);
     }
   };
 
   const handlePostComment = async () => {
     if (newComment.trim() === '') return;
-    const res = await CommService.sendComm(file._id, { content: newComment });
+    const data = new FormData();
+    data.append('content', newComment);
+    const res = await CommService.sendComm(file._id, data);
     if (res.data) {
       setComments([res.data, ...comments]);
       setNewComment('');
@@ -30,8 +35,8 @@ const CommentModal = ({ isVisible, onClose, file }) => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.commentContainer}>
-      <Text style={styles.commentUser}>{item.sender.name}</Text>
+    <View style={ state.user._id  === item.sender._id ? styles.commentContainerUser : styles.commentContainer}>
+      <Text style={styles.commentUser}>@{item.sender.name}</Text>
       <Text style={styles.commentText}>{item.content}</Text>
     </View>
   );
@@ -45,6 +50,7 @@ const CommentModal = ({ isVisible, onClose, file }) => {
     >
       <KeyboardAvoidingView style={styles.modalContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.modalContent}>
+          <Text style={styles.title} >Comments</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close-circle" size={24} color="#fff" />
           </TouchableOpacity>
@@ -76,6 +82,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    
   },
   modalContent: {
     backgroundColor: '#000',
@@ -83,12 +90,19 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     height: '60%',
+    borderTopWidth:1,
+    borderTopColor:'#ccc'
   },
   closeButton: {
     alignSelf: 'flex-end',
   },
   commentContainer: {
     marginBottom: 15,
+    alignSelf:'flex-start'
+  },
+    commentContainerUser: {
+    marginBottom: 15,
+    alignSelf:'flex-end'
   },
   commentUser: {
     color: '#ffd700',
@@ -117,6 +131,12 @@ const styles = StyleSheet.create({
   sendButton: {
     padding: 5,
   },
+  title:{
+    color:'#fff',
+    textAlign:'center',
+    fontSize:25,
+    fontWeight:'bold'
+  }
 });
 
 export default CommentModal;
