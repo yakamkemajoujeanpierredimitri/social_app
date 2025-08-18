@@ -1,3 +1,4 @@
+import { useIsFocused } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
@@ -7,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Dimensions,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -31,16 +33,19 @@ const CameraScreen = () => {
   const cameraRef = useRef(null);
   const recordingTimer = useRef(null);
   const router = useRouter();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    (async () => {
-      const { status: audioStatus } = await Audio.requestPermissionsAsync();
-      const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
-      
-      setHasAudioPermission(audioStatus === 'granted');
-      setHasMediaPermission(mediaStatus === 'granted');
-    })();
-  }, []);
+    if (isFocused) {
+      (async () => {
+        const { status: audioStatus } = await Audio.requestPermissionsAsync();
+        const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
+        
+        setHasAudioPermission(audioStatus === 'granted');
+        setHasMediaPermission(mediaStatus === 'granted');
+      })();
+    }
+  }, [isFocused]);
 
   // Cleanup timer on component unmount
   useEffect(() => {
@@ -110,16 +115,19 @@ const CameraScreen = () => {
           quality: 1,
           base64:false, // Set to false to improve performance unless you specifically need base64
         });
-        
+        console.log(photo);
         setCapturedPhoto(photo);
         dispatch({
-          type: 'SET_CAPTURED_FILE',
-          payload: { file: photo }
+          type: 'SET_RECORD_FILE',
+          payload: { file: {...photo,
+            type:'image',
+            fileName: photo.uri.split('/').pop(),
+          } }
         });
         
         // Optional: Save to media library
         await MediaLibrary.saveToLibraryAsync(photo.uri);
-        router.navigate('/add');
+        //router.navigate('/add');
       } catch (error) {
         console.error('Error taking picture:', error);
         Alert.alert('Error', 'Failed to capture photo');
@@ -186,6 +194,22 @@ const CameraScreen = () => {
         >
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (capturedPhoto) {
+    return (
+      <View style={styles.container}>
+        <Image source={{ uri: capturedPhoto.uri }} style={styles.camera} />
+        <View style={styles.previewControls}>
+          <TouchableOpacity style={styles.previewButton} onPress={() => setCapturedPhoto(null)}>
+            <Text style={styles.previewButtonText}>Retake</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.previewButton} onPress={() => router.navigate('/add')}>
+            <Text style={styles.previewButtonText}>Use Photo</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -396,6 +420,26 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },
+  previewControls: {
+    position: 'absolute',
+    bottom: 50,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  previewButton: {
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+  },
+  previewButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 export  default CameraScreen;

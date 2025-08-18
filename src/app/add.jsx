@@ -4,23 +4,14 @@ import * as MediaLibrary from 'expo-media-library';
 import { useNavigation } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect, useRef, useState } from 'react';
-import {
-  Alert,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useFile } from '../context/fileProvider';
 import FileService from '../service/fileService';
 
 const CreatePostScreen = () => {
   const navigation = useNavigation();
-  const {state}= useFile();
+  const {state, dispatch}= useFile();
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState('');
   const [media, setMedia] = useState(state.recordfile);
@@ -91,6 +82,7 @@ const CreatePostScreen = () => {
       return;
     }
     const n = prompt.split('#');
+    console.log(n.length < 2 || !prompt.trim());
     if(n.length <2 || !prompt.trim()){
          Alert.alert('Required', 'Please select a photo or video');
       return;
@@ -106,13 +98,20 @@ const CreatePostScreen = () => {
     })
 
    // console.log('Posting:', media);
-    const res = await FileService.uploadFile(postData);
+    const res = await FileService.uploadFile(dispatch,postData);
+    if(state.error){
+      Alert.alert('error',state.error);
+      return;
+    }
     Alert.alert('Success', 'Post created successfully!');
     navigation.navigate('/(tabs)');
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       {/* Header with close button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() =>{
@@ -123,7 +122,7 @@ const CreatePostScreen = () => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Post</Text>
          <TouchableOpacity 
-          onPress={handlePost} 
+          onPress={()=>handlePost()} 
           style={styles.postButton}
           disabled={state.isUploadingVideo}
         >
@@ -197,7 +196,7 @@ const CreatePostScreen = () => {
           />
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
