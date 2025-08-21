@@ -5,7 +5,6 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_CLIENT_URL;
 console.log(API_BASE_URL);
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
   withCredentials: true,
 });
 

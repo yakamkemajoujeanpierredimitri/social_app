@@ -7,10 +7,9 @@ const UserList = ({ users, onClose }) => {
     onClose();
     router.push(`/profile/${userId}`);
   };
-
+//console.log(users);
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.userItem} onPress={() => handleUserPress(item._id)}>
-      {console.log(item.Author?._id  ? true : false)}
       <Image source={ item.Author?._id ?  { uri: item.Author.avatar } : { uri: item.Follower.avatar }} style={styles.avatar} />
       <Text style={styles.name}>{item.Author?._id ?  item.Author.name : item.Follower.name}</Text>
     </TouchableOpacity>
@@ -49,6 +48,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
+    width:"100%",
   },
   avatar: {
     width: 100,

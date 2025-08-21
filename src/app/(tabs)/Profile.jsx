@@ -1,4 +1,6 @@
+import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Image, LayoutAnimation, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
 import UserList from '../../component/UserList';
@@ -15,7 +17,7 @@ if (Platform.OS === 'android') {
 const Profile = () => {
   const { state, dispatch } = useAuth();
   const { user } = state;
-
+  const router = useRouter();
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -46,7 +48,9 @@ const Profile = () => {
       setPostsLoading(true);
       const userPostsRes = await UserService.userPosts();
       if (userPostsRes.data) {
-        setUserPosts(userPostsRes.data);
+        const postsWithMediaId = userPostsRes.data.filter(post => post.mediaId);
+        const postsWithoutMediaId = userPostsRes.data.filter(post => !post.mediaId);
+        setUserPosts([...postsWithMediaId, ...postsWithoutMediaId]);
       }
       const savedPostsRes = await UserService.savePosts(); 
        
@@ -59,7 +63,21 @@ const Profile = () => {
 
     fetchFollowData();
     fetchPostsData();
-  }, [user]); // Re-fetch if user data changes
+    
+  }, [user]);
+  useEffect(()=>{
+    state.socket.on('uncensore',(id)=>{
+      const newposts = userPosts.map((item)=>{
+        if(item._id  === id){
+          item.mediaId = null;
+          return item;
+        }
+        return item;
+      });
+      setUserPosts(newposts);
+    });
+    return()=>state.socket.off('uncensore');
+  },[state.socket]); // Re-fetch if user data changes
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -126,13 +144,18 @@ const Profile = () => {
 
   const renderPostItem = ({ item }) => (
     <View style={styles.postItem}>
-    
-      <Image 
-      source={{uri:item.thumbnail}}
-      style={styles.imagethum}
-      />
-      
-      {/* You might want to add more post details here */}
+      {item.mediaId ? (
+        <View style={styles.postItem}>
+          <Image source={{ uri: item.thumbnail }} style={styles.imagethum} />
+          <BlurView intensity={100} style={styles.blurContainer}>
+            <Text style={styles.control}>Controlling...</Text>
+          </BlurView>
+        </View>
+      ) : (
+        <TouchableOpacity onPress={() => router.navigate(`/watch/${item._id}`)}>
+          <Image source={{ uri: item.thumbnail }} style={styles.imagethum} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 
@@ -372,6 +395,18 @@ const styles = StyleSheet.create({
     width:"100%",
     height:"100%",
     objectFit:'cover'
+  },
+  blurContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  control:{
+    textAlign:"center",
+    zIndex:1,
+    color:'#fff',
+    fontSize:20,
+    fontWeight: 'bold',
   }
 });
 

@@ -1,24 +1,19 @@
 import apiClient from "./apiClient";
 const FileService = {
 
-    uploadFile: async (dispatch , file) => {
+            uploadFile: async (dispatch , file, onProgress) => {
         // Implement file upload logic here
         
         dispatch({ type: 'UPLOAD_VIDEO_START' });
         try {
             const res = await apiClient.post("/post?app=true", file, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+                headers:{'Content-Type':'multipart/form-data'},
                 onUploadProgress: (progressEvent) => {
                     if (onProgress) {
                         const percentCompleted = Math.round(
                             (progressEvent.loaded * 100) / progressEvent.total
                         );
-                        dispatch({
-                            type: 'UPLOAD_VIDEO_PROGRESS',
-                            payload: percentCompleted
-                        })
+                        onProgress(percentCompleted);
                     }
                 }
             });
@@ -26,14 +21,17 @@ const FileService = {
                 type: 'UPLOAD_VIDEO_SUCCESS',
                 payload: { video: res.data }
             });
-
+            console.log(res.data);
+            return {success:true};
         } catch (error) {
-            console.error('FileService.uploadFile error:', error);
-            const errorMessage = error.response?.data?.message || 'File upload failed';
+           console.log(error);
+            const errorMessage = error.response?.data?.message || 'File upload failed'; 
+            console.error('FileService.uploadFile error:', errorMessage);
             dispatch({
                 type: 'UPLOAD_VIDEO_ERROR',
                 payload: errorMessage
             });
+            return{msg:errorMessage};
         }
     },
     deleteFile: async (dispatch,fileId) => {

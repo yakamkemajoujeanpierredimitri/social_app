@@ -126,7 +126,7 @@ const CameraScreen = () => {
         });
         
         // Optional: Save to media library
-        await MediaLibrary.saveToLibraryAsync(photo.uri);
+        //await MediaLibrary.saveToLibraryAsync(photo.uri);
         //router.navigate('/add');
       } catch (error) {
         console.error('Error taking picture:', error);

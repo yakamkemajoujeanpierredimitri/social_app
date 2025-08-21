@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -10,6 +10,7 @@ import { useFile } from '../context/fileProvider';
 import FileService from '../service/fileService';
 
 const CreatePostScreen = () => {
+  const router = useRouter();
   const navigation = useNavigation();
   const {state, dispatch}= useFile();
   const [title, setTitle] = useState('');
@@ -43,16 +44,13 @@ const CreatePostScreen = () => {
     }
   }, [media, mediaType]);
 
-  useEffect(()=>{
-    setUploadProgress(state.uploadProgress);
-  },[state.uploadProgress]);
-
   const pickImage = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
         quality: 1,
+        base64:true
       });
 
       if (!result.canceled) {
@@ -87,24 +85,34 @@ const CreatePostScreen = () => {
          Alert.alert('Required', 'Please select a photo or video');
       return;
     }  // Here you would typically upload the media and post data to your backend
-     console.log( media);
+     //console.log( media);
     const postData = new FormData();
+    postData.append('file',{
+        uri:media.uri, 
+        name:media.fileName,
+        type:media.mimeType,
+       
+    });
     postData.append('title',title);
     postData.append('prompt',prompt);
-    postData.append('file',{
-        uri:media.uri,
-        type:mediaType,
-        name:media.fileName
-    })
-
-   // console.log('Posting:', media);
-    const res = await FileService.uploadFile(dispatch,postData);
-    if(state.error){
-      Alert.alert('error',state.error);
+   //console.log( media);
+    const res  =  await FileService.uploadFile(dispatch,postData,(progress) => {
+      setUploadProgress(progress);
+    });
+    if(state.error || res.msg){
+      Alert.alert('error',res.msg);
       return;
     }
-    Alert.alert('Success', 'Post created successfully!');
-    navigation.navigate('/(tabs)');
+    if(res.success === true){
+      setMedia(null);
+      setPrompt('');
+      setMediaType('');
+      setTitle('');
+      setUploadProgress(0);
+       Alert.alert('Success', 'Post created successfully!');
+        //router.navigate('/(tabs)');
+    }
+   
   };
 
   return (
@@ -298,7 +306,7 @@ const styles = StyleSheet.create({
     color: '#ccc',
   },
   progressBarContainer: {
-    height: 3,
+    height: 50,
     width: '100%',
     backgroundColor: '#e0e0e0',
   }
