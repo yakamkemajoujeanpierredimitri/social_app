@@ -5,7 +5,7 @@ import { useAuth } from '../../../context/authProvider';
 import UserService from '../../../service/userService';
 
 const ProfilesScreen = () => {
-  const { state ,dispatch } = useAuth();
+  const { state, dispatch } = useAuth();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [showOnline, setShowOnline] = useState(false);
@@ -23,13 +23,10 @@ const ProfilesScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (state.socket) {
-      state.socket.on('Onlineusers', (onlineUsers) => {
-        setOnlineUsers(onlineUsers);
-      });
-    }
-    
-  }, [state.socket]);
+
+    setOnlineUsers(state.onlineusers);
+
+  }, [state.onlineusers]);
 
   const handleProfilePress = (user) => {
     dispatch({ type: 'SET_Guest', payload: { ricever: user } });
@@ -72,8 +69,8 @@ const ProfilesScreen = () => {
             </View>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={()=>{
-          return(
+        ListEmptyComponent={() => {
+          return (
             <Text style={styles.notfound} >No users</Text>
           )
         }}
@@ -86,9 +83,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    alignContent:"center",
-    justifyContent:"center",
-    padding:20
+    alignContent: "center",
+    justifyContent: "center",
+    padding: 20
   },
   header: {
     flexDirection: 'row',
@@ -137,10 +134,10 @@ const styles = StyleSheet.create({
     color: '#999',
     fontSize: 14,
   },
-  notfound:{
-    color:'#fff',
-    fontSize:30,
-    textAlign:'center'
+  notfound: {
+    color: '#fff',
+    fontSize: 30,
+    textAlign: 'center'
 
   }
 });

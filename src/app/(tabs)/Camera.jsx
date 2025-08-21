@@ -3,6 +3,7 @@ import { Audio } from 'expo-av';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import { useRouter } from 'expo-router';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import LottieView from 'lottie-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -27,9 +28,11 @@ const CameraScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
+  const [capturedVideo, setCapturedVideo] = useState(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [hasAudioPermission, setHasAudioPermission] = useState(null);
   const [hasMediaPermission, setHasMediaPermission] = useState(null);
+  const player =useVideoPlayer(capturedVideo);
   const cameraRef = useRef(null);
   const recordingTimer = useRef(null);
   const router = useRouter();
@@ -71,11 +74,13 @@ const CameraScreen = () => {
         const video = await cameraRef.current.recordAsync({
           maxDuration: 60, // 60 seconds max
         });
-          const name  = video.uri.split('/');
+        setCapturedVideo(video);
+          const name  = video.uri.split('/').pop();
            dispatch({
             type: 'SET_RECORD_FILE',
-            payload: { file: {uri:video.uri, type:'video' ,fileName:name[name.length - 1]} }
+            payload: { file: {uri:video.uri, mimeType:`video/${name.split('.').pop()}` ,fileName:name} }
           });
+          //console.log({uri:video.uri, mimeType:`video/${name.split('.').pop()}` ,fileName:name});
           //await MediaLibrary.saveToLibraryAsync(video.uri);
         //return video;
       } catch (error) {
@@ -98,7 +103,7 @@ const CameraScreen = () => {
         
           // Optional: Save to media library
           
-          router.navigate('/add');
+         // router.navigate('/add');
         
       } catch (error) {
         console.error('Stop recording failed:', error);
@@ -115,16 +120,15 @@ const CameraScreen = () => {
           quality: 1,
           base64:false, // Set to false to improve performance unless you specifically need base64
         });
-        console.log(photo);
+      
         setCapturedPhoto(photo);
         dispatch({
           type: 'SET_RECORD_FILE',
           payload: { file: {...photo,
-            type:'image',
+            mimeType:`image/${photo.format.replace('.','')}`,
             fileName: photo.uri.split('/').pop(),
           } }
         });
-        
         // Optional: Save to media library
         //await MediaLibrary.saveToLibraryAsync(photo.uri);
         //router.navigate('/add');
@@ -208,6 +212,28 @@ const CameraScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity style={styles.previewButton} onPress={() => router.navigate('/add')}>
             <Text style={styles.previewButtonText}>Use Photo</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+  
+  if (capturedVideo) {
+    return (
+      <View style={styles.container}>
+        <VideoView
+        player={player}
+       allowsPictureInPicture
+       allowsFullscreen
+       nativeControls
+       style={styles.camera}
+        />
+        <View style={styles.previewControls}>
+          <TouchableOpacity style={styles.previewButton} onPress={() => setCapturedVideo(null)}>
+            <Text style={styles.previewButtonText}>Retake</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.previewButton} onPress={() => router.navigate('/add')}>
+            <Text style={styles.previewButtonText}>Use video</Text>
           </TouchableOpacity>
         </View>
       </View>

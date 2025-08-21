@@ -1,6 +1,8 @@
+import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MessageSkeleton from '../../component/MessageSkeleton';
 import { useAuth } from '../../context/authProvider';
@@ -11,28 +13,23 @@ const ChatScreen = () => {
   const { state, dispatch } = useAuth();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
   const [recipient, setRecipient] = useState(state.ricever);
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const flatListRef = useRef(null);
+
+  const onScrollToIndexFailed = info => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      flatListRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: true });
+    });
+  };
 
   useEffect(() => {
     setRecipient(state.ricever);
-  }, [state.ricever]);
-
-  useEffect(() => {
-    if (state.socket) {
-      state.socket.on('onlineusers', (onlineUsers) => {
-        setIsOnline(onlineUsers.includes(userId));
-      });
-    }
-    return () => {
-      state.socket.off('onlineusers');
-    }
-  }, [state.socket, userId]);
-
-  useEffect(() => {
-    const fetchMessages = async () => {
+      const fetchMessages = async () => {
       const res = await ChatService.getChat(userId);
       if (res.data) {
         setMessages(res.data);
@@ -40,34 +37,73 @@ const ChatScreen = () => {
       setIsLoading(false);
     };
     fetchMessages();
+  }, [state.ricever]);
 
-    if (state.socket) {
-      state.socket.on('message', (message) => {
+  useEffect(() => {
+    if (flatListRef.current && messages.length > 0) {
+      setTimeout(() => flatListRef.current.scrollToIndex({ index: messages.length -1, animated: true }), 100);
+    }
+  }, [messages]);
+
+  const Listenmessage = useCallback(()=>{
+     if (state.socket) {
+      state.socket.on('msg', (message) => {
         if (message.sender?._id == userId) {
-          setMessages((prevMessages) => [message, ...prevMessages]);
+          setMessages((prevMessages) => [...prevMessages, message]);
         }
-
       });
     }
+  }, [state.socket, userId])
+
+  const StopListen= useCallback(()=>{
+     state.socket?.off('msg');
+  }, [state.socket])
+
+  useEffect(() => {
+    
+    setIsOnline(state.onlineusers.includes(userId));
+    Listenmessage();
 
     return () => {
-      if (state.socket) {
-        state.socket.off('message');
-      }
-    };
-  }, [userId, state.socket]);
+      StopListen();
+    }
+  }, [state.onlineusers, Listenmessage , StopListen]);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+      base64:true
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0]);
+    }
+  };
 
   const handleSend = async () => {
-    if (newMessage.trim() === '') return;
+    if (newMessage.trim() === '' && !selectedImage) return;
 
     const messageData = new FormData();
     messageData.append('content', newMessage);
+
+    if (selectedImage) {
+      messageData.append('file',{
+        uri:selectedImage.uri,
+        fileName:selectedImage.fileName,
+        type:selectedImage.mimeType
+      } );
+    }
+
     const res = await ChatService.sendChat(userId, messageData);
     if (res.msg) {
       Alert.alert('Chat error', res.msg);
       return;
     }
+    setMessages((prevMessages) => [...prevMessages, res.data]);
     setNewMessage('');
+    setSelectedImage(null);
   };
 
   const formatTimestamp = (timestamp) => {
@@ -93,7 +129,8 @@ const ChatScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={[styles.messageContainer, item.sender?._id === state.user._id ? styles.myMessage : styles.theirMessage]}>
-      <Text style={item.sender?._id === state.user._id ? styles.messageText : { color: '#fff', fontSize: 16 }}>{item.content}</Text>
+      {item.content ? <Text style={item.sender?._id === state.user._id ? styles.messageText : { color: '#fff', fontSize: 16 }}>{item.content}</Text> : null}
+      {item.file && <Image source={{ uri: item.file }} style={styles.messageImage} />}
       <Text style={styles.timestamp}>{formatTimestamp(item.createdAt)}</Text>
     </View>
   );
@@ -115,13 +152,25 @@ const ChatScreen = () => {
         <MessageSkeleton />
       ) : (
         <FlatList
+          ref={flatListRef}
           data={messages}
           renderItem={renderItem}
           keyExtractor={(item) => item._id}
-          inverted
+          onScrollToIndexFailed={onScrollToIndexFailed}
         />
       )}
+      {selectedImage && (
+        <View style={styles.previewContainer}>
+          <Image source={{ uri: selectedImage.uri }} style={styles.previewImage} />
+          <TouchableOpacity onPress={() => setSelectedImage(null)} style={styles.removeImageButton}>
+            <Feather name="x" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={styles.inputContainer}>
+        <TouchableOpacity style={styles.attachButton} onPress={pickImage}>
+          <Feather name="paperclip" size={24} color="#fff" />
+        </TouchableOpacity>
         <TextInput
           style={styles.input}
           value={newMessage}
@@ -182,6 +231,12 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 16,
   },
+  messageImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    marginTop: 5,
+  },
   timestamp: {
     color: '#666',
     fontSize: 12,
@@ -194,6 +249,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#333',
     backgroundColor: '#1a1a1a',
+    alignItems: 'center',
   },
   input: {
     flex: 1,
@@ -216,6 +272,29 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  attachButton: {
+    paddingHorizontal: 10,
+  },
+  previewContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#1a1a1a',
+  },
+  previewImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    padding: 2,
   },
 });
 

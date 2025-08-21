@@ -13,7 +13,8 @@ const authInitialState = {
   socket: null,
   isAuthenticated: false,
   visitor:null,
-  ricever:null
+  ricever:null,
+  onlineusers:[]
 };
 
 const authReducer = (state, action) => {
@@ -30,6 +31,11 @@ const authReducer = (state, action) => {
         user: action.payload.user,
         isAuthenticated: true,
         error: null,
+      }
+    case 'SET_ONLINE_USERS':
+      return{
+        ...state,
+        onlineusers:action.payload
       }
     case 'REGISTER_SUCCESS':
       return {
@@ -146,12 +152,23 @@ export const AuthProvider = ({ children }) => {
   const Logout = async () => {
     await AuthService.logout();
     dispatch({ type: 'LOGOUT' });
+    if(state.socket){
+       state.socket.disconnect();
+    }
+   
   }
   const Connect = (id)=>{
     const res = io(process.env.EXPO_PUBLIC_CLIENT_URL,{
         query: {
         userID: id,
       },
+    });
+    res.connect();
+    res.on('onlineusers',(users)=>{
+       dispatch({
+      type:'SET_ONLINE_USERS',
+      payload:users
+    });
     });
     dispatch({
       type:'SET_SOCKET',

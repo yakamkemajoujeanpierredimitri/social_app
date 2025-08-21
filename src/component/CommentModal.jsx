@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../context/authProvider';
 import CommService from '../service/comService';
@@ -13,7 +13,23 @@ const CommentModal = ({ isVisible, onClose, file ,setnum }) => {
       fetchComments();
     }
   }, [isVisible]);
+useEffect(()=>{
+  Listenmessage();
+  return ()=>StopListen();
+},[Listenmessage,StopListen]);
+  const Listenmessage = useCallback(()=>{
+     if (state.socket) {
+      state.socket.on('comments', (message) => {
+        if (message.post === file._id) {
+          setComments((prevMessages) => [...prevMessages, message]);
+        }
+      });
+    }
+  }, [state.socket]);
 
+  const StopListen= useCallback(()=>{
+     state.socket?.off('comments');
+  }, [state.socket]);
   const fetchComments = async () => {
     const res = await CommService.getComm(file._id);
     if (res.data) {

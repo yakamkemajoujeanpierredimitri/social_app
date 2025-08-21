@@ -57,6 +57,7 @@ const CreatePostScreen = () => {
         setMedia(result.assets[0]);
         setMediaType(result.assets[0].type === 'image' ? 'image' : 'video');
       }
+      
     } catch (error) {
       Alert.alert('Error', 'Failed to pick image/video');
       console.error(error);
@@ -109,8 +110,8 @@ const CreatePostScreen = () => {
       setMediaType('');
       setTitle('');
       setUploadProgress(0);
-       Alert.alert('Success', 'Post created successfully!');
-        //router.navigate('/(tabs)');
+      Alert.alert('Success', 'Post created successfully!');
+      router.navigate('/(tabs)/Home');
     }
    
   };
@@ -141,7 +142,7 @@ const CreatePostScreen = () => {
       </View>
         {state.isUploadingVideo && (
         <View style={styles.progressBarContainer}>
-         <Text style={styles.postButtonText} > {`${uploadProgress}¨%`}</Text>
+         <Text style={[styles.postButtonText ,{width:`${uploadProgress}%`,backgroundColor:"#2b5aacff"} ]} > {`${uploadProgress}%`}</Text>
         </View>
       )}
 
@@ -306,7 +307,7 @@ const styles = StyleSheet.create({
     color: '#ccc',
   },
   progressBarContainer: {
-    height: 50,
+    height: 20,
     width: '100%',
     backgroundColor: '#e0e0e0',
   }

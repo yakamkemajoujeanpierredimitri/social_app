@@ -8,7 +8,7 @@ sendChat : async (id ,data)=>{
         });
         return {data:res.data};
     } catch (error) {
-         console.error('chatService error:', error);
+         console.error( error);
         const errorMessage = error.response?.data?.message || 'File upload failed';
         return {msg:errorMessage};
     }
