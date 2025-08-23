@@ -84,7 +84,7 @@ const authReducer = (state, action) => {
       return {
         ...state,
         isLoading: false,
-        isAuthenticated: true,
+        isAuthenticated: action.payload.user !== null ? true : false,
         user: action.payload.user || null,
       };
     case "Check_start":
@@ -120,7 +120,7 @@ export const AuthProvider = ({ children }) => {
         type: "LOGIN_ERROR",
         payload: res.msg
       });
-      return;
+      return {msg:res.msg};
     }
     delete res.data.accessToken;
     delete res.data.refreshToken;
@@ -129,17 +129,18 @@ export const AuthProvider = ({ children }) => {
       type: "LOGIN_SUCCESS",
       payload: { user: res.data }
     });
+    return {success:true};
   }
   const Register = async (data) => {
     dispatch({ type: 'REGISTER_START' });
     const res = await AuthService.register(data);
     if (res?.msg) {
-      console.log(res.msg);
+      //console.log(res.msg);
       dispatch({
         type: "REGISTER_ERROR",
         payload: res.msg
       });
-      return;
+      return{msg : res.msg} ;
     }
     delete res.data.accessToken;
     delete res.data.refreshToken;
@@ -148,6 +149,7 @@ export const AuthProvider = ({ children }) => {
       type: "REGISTER_SUCCESS",
       payload: { user: res.data }
     });
+    return {success:true};
   }
   const Logout = async () => {
     await AuthService.logout();

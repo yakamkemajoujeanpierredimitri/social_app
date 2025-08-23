@@ -4,13 +4,15 @@ const ChatService = {
 sendChat : async (id ,data)=>{
     try {
         const res = await apiClient.post(`/message/${id}?app=true`,data,{
-            headers:{'Content-Type': 'multipart/form-data'}
+            headers:{'Content-Type':'multipart/form-data'}
         });
+        console.log(res.data);
         return {data:res.data};
     } catch (error) {
-         console.error( error);
+         //console.error( error);
         const errorMessage = error.response?.data?.message || 'File upload failed';
-        return {msg:errorMessage};
+        console.log(errorMessage.error.message);
+        return {msg:errorMessage.error.message};
     }
 },
 getChat:async (id)=>{

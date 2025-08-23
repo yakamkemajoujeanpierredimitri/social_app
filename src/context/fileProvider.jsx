@@ -116,6 +116,7 @@ const videoReducer = (state, action) => {
       return {
         ...state,
         file: null,
+        isLoading:false
       };
     
     case 'DELETE_VIDEO_ERROR':

@@ -18,7 +18,7 @@ const RegisterScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { state, Register } = useAuth();
+  const { state, Register ,dispatch} = useAuth();
   const animationRef = useRef(null);
   const router = useRouter();
 
@@ -39,13 +39,15 @@ const RegisterScreen = ({ navigation }) => {
       return;
     }
 
-    await Register({ name, email, password });
+    const res = await Register({ name, email, password });
 
-    if (state.error) {
-      Alert.alert('Registration Failed', state.error);
-    } else {
+    if ( res?.msg) {
+      Alert.alert('Registration Failed',  res?.msg);
+    } 
+    if(res?.success === true){
       router.navigate('/(tabs)/Home');
     }
+    
   };
 
   return (
@@ -106,7 +108,10 @@ const RegisterScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.loginLink}
-          onPress={() => router.navigate('/auth')}
+          onPress={() => {
+            dispatch({ type: 'CLEAR_ERROR' });
+            router.navigate('/auth');
+          }}
         >
           <Text style={styles.loginText}>
             Already have an account? Sign in

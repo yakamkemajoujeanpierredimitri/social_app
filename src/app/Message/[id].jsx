@@ -17,6 +17,7 @@ const ChatScreen = () => {
   const [recipient, setRecipient] = useState(state.ricever);
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const router = useRouter();
   const flatListRef = useRef(null);
 
@@ -84,9 +85,11 @@ const ChatScreen = () => {
 
   const handleSend = async () => {
     if (newMessage.trim() === '' && !selectedImage) return;
-
+    setIsSending(true);
     const messageData = new FormData();
-    messageData.append('content', newMessage);
+    if (newMessage.trim() !== '') {
+      messageData.append('content', newMessage);
+    }
 
     if (selectedImage) {
       messageData.append('file', {
@@ -95,15 +98,18 @@ const ChatScreen = () => {
         type: selectedImage.mimeType
       });
     }
+    //console.log(messageData.get('file'));
 
     const res = await ChatService.sendChat(userId, messageData);
     if (res.msg) {
       Alert.alert('Chat error', res.msg);
+      setIsSending(false);
       return;
     }
     setMessages((prevMessages) => [...prevMessages, res.data]);
     setNewMessage('');
     setSelectedImage(null);
+    setIsSending(false);
   };
 
   const formatTimestamp = (timestamp) => {
@@ -183,7 +189,7 @@ const ChatScreen = () => {
           placeholderTextColor="#666"
         />
         <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-          <Text style={styles.sendButtonText}>Send</Text>
+          <Text style={styles.sendButtonText}>{isSending ? 'Sending...' : 'Send'}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

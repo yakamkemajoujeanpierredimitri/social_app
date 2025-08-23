@@ -88,7 +88,7 @@ userAvatar:async (data)=>{
     getVisitorSaves:async(id)=>{
         try {
             const res = await apiClient.get(`/user/saves/visitor/${id}?app=true`);
-           return  {data : res.data};
+           return  {data : res.data[0].saves};
         } catch (error) {
                const errorMessage = error.response?.data?.message || "failed to fech users";
             return { msg : errorMessage};

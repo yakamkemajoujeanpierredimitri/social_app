@@ -26,12 +26,14 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-     await Login({email,password});
-    if(state.error){
-        Alert.alert('Login Failed', state.error);
+    const res =  await Login({email,password});
+    if( res?.msg){
+        Alert.alert('Login Failed',  res?.msg);
+        return;
     } 
-    router.navigate('/(tabs)/Home');
-          
+    if(res?.success === true){
+      router.navigate('/(tabs)/Home');
+    }          
   };
 
   return (
@@ -83,7 +85,10 @@ const LoginScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.registerLink}
-          onPress={() => router.navigate('/auth/signup')}
+          onPress={() => {
+            dispatch({ type: 'CLEAR_ERROR' });
+            router.navigate('/auth/signup');
+          }}
         >
           <Text style={styles.registerText}>
             Don't have an account? Sign up

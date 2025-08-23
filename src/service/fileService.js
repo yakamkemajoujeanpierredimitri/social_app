@@ -35,19 +35,21 @@ const FileService = {
         }
     },
     deleteFile: async (dispatch,fileId) => {
-        
+        dispatch({ type: 'FETCH_VIDEO_START' });
         // Implement file deletion logic here
         try {
             const res = await apiClient.delete(`/post/${fileId}?app=true`);
-            dispatch({
-                type: 'DELETE_VIDEO_SUCCESS',
-            });
+          
         } catch (error) {
             console.error('FileService.deleteFile error:', error);
             const errorMessage = error.response?.data?.message || 'File deletion failed';
             dispatch({
                 type: 'DELETE_VIDEO_ERROR',
                 payload: errorMessage
+            });
+        }finally{
+              dispatch({
+                type: 'DELETE_VIDEO_SUCCESS',
             });
         }
     },

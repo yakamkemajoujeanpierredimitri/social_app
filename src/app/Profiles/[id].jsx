@@ -13,7 +13,7 @@ if (Platform.OS === 'android') {
 }
 
 const Profile = () => {
-  const { state  ,dispatch} = useAuth();
+  const { state, dispatch } = useAuth();
   const { visitor } = state;
   const router = useRouter();
   const [followers, setFollowers] = useState([]);
@@ -23,6 +23,7 @@ const Profile = () => {
   const [userPosts, setUserPosts] = useState([]);
   const [savedPosts, setSavedPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     const fetchFollowData = async () => {
@@ -42,29 +43,56 @@ const Profile = () => {
       if (userPostsRes.data) {
         //const postsWithMediaId = userPostsRes.data.filter(post => post.mediaId);
         const postsWithoutMediaId = userPostsRes.data.filter(post => !post.mediaId);
-        setUserPosts([ ...postsWithoutMediaId]);
+        setUserPosts([...postsWithoutMediaId]);
       }
-      const savedPostsRes = await UserService.getVisitorSaves(visitor._id); 
-       
+      const savedPostsRes = await UserService.getVisitorSaves(visitor._id);
+
       if (savedPostsRes.data) {
-      
+
         setSavedPosts(savedPostsRes.data);
       }
       setPostsLoading(false);
     };
-
+    const checkFollowing = async () => {
+      const res = await UserService.getFollowing();
+      if (res.msg) {
+        console.log(res.msg);
+        return;
+      }
+      setIsFollowing(res.data.some(followedUser => followedUser.Author?._id === visitor._id));
+      //console.log(res.data.some(followedUser => followedUser.Author?._id === file.sender._id));
+    };
+    
+    checkFollowing();
     fetchFollowData();
     fetchPostsData();
-    
+
   }, []);
-// Re-fetch if user data changes
+  // Re-fetch if user data changes
   const handleTabChange = (tab) => {
     LayoutAnimation.easeInEaseOut();
     setActiveTab(tab);
   };
 
- 
 
+  const handleFollow = async () => {
+    if (isFollowing) {
+      const res = await UserService.unfollow({ Author: file.sender._id });
+      if (res.msg) {
+        Alert.alert("Error", res.msg);
+        return;
+      }
+      setIsFollowing(false);
+    } else {
+      const res = await UserService.follow({ Author: file.sender._id });
+      if (res.msg) {
+        Alert.alert("Error", res.msg);
+        return;
+      }
+      setIsFollowing(true);
+    }
+
+  }
   const renderPostItem = ({ item }) => (
     <View style={styles.postItem}>
       {item.mediaId ? (
@@ -97,12 +125,18 @@ const Profile = () => {
             <Text style={styles.statLabel}>Following</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.editProfileButton} onPress={() =>{
-          dispatch({type:"SET_Guest",payload:{ricever:visitor}});
-          router.navigate(`/Messages/${visitor._id}`);
-        }  }>
+        <View style={styles.statsContainer}>
+            <TouchableOpacity style={styles.editProfileButton} onPress={() => {
+          dispatch({ type: "SET_Guest", payload: { ricever: visitor } });
+          router.navigate(`/Message/${visitor._id}`);
+        }}>
           <Text style={styles.editProfileButtonText}>Message</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.editProfileButton} onPress={() => handleFollow()}>
+          <Text style={styles.editProfileButtonText}> {isFollowing ? "Unfollow" : "Follow"} </Text>
+        </TouchableOpacity>
+        </View>
+     
       </View>
 
       <View style={styles.tabBar}>
@@ -212,27 +246,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     overflow: 'hidden',
-    height:200
+    height: 200
   },
   loadingIndicator: {
     marginTop: 50,
   },
 
-  imagethum:{
-    width:"100%",
-    height:"100%",
-    objectFit:'cover'
+  imagethum: {
+    width: "100%",
+    height: "100%",
+    objectFit: 'cover'
   },
   blurContainer: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  control:{
-    textAlign:"center",
-    zIndex:1,
-    color:'#fff',
-    fontSize:20,
+  control: {
+    textAlign: "center",
+    zIndex: 1,
+    color: '#fff',
+    fontSize: 20,
     fontWeight: 'bold',
   },
   editProfileButton: {
@@ -242,9 +276,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFD700',
     borderRadius: 5,
+    margin:5
   },
   editProfileButtonText: {
-    color: '#FFD700',
+    color: '#0e0d0dff',
     fontSize: 16,
     fontWeight: 'bold',
   },
