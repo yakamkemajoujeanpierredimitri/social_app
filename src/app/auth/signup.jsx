@@ -2,14 +2,14 @@ import { useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import { useRef, useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useAuth } from '../../context/authProvider';
 
@@ -44,7 +44,7 @@ const RegisterScreen = ({ navigation }) => {
     if (state.error) {
       Alert.alert('Registration Failed', state.error);
     } else {
-      router.navigate('/(tabs)');
+      router.navigate('/(tabs)/Home');
     }
   };
 

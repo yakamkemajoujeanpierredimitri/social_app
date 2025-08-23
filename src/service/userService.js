@@ -102,6 +102,24 @@ userAvatar:async (data)=>{
                const errorMessage = error.response?.data?.message || "failed to fech users";
             return { msg : errorMessage};
         }
+    },
+    getVisitorFollowers:async(id)=>{
+        try {
+            const res = await apiClient.get(`/follow/visitorfw/${id}?app=true`);
+           return  {data : res.data};
+        } catch (error) {
+               const errorMessage = error.response?.data?.message || "failed to fech users";
+            return { msg : errorMessage};
+        }
+    },
+    getVisitorFollowing:async(id)=>{
+        try {
+            const res = await apiClient.get(`/follow/visitorfl/${id}?app=true`);
+           return  {data : res.data};
+        } catch (error) {
+               const errorMessage = error.response?.data?.message || "failed to fech users";
+            return { msg : errorMessage};
+        }
     }
 };
 export default UserService;

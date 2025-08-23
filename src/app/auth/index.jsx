@@ -30,7 +30,7 @@ const LoginScreen = ({ navigation }) => {
     if(state.error){
         Alert.alert('Login Failed', state.error);
     } 
-    router.navigate('/(tabs)');
+    router.navigate('/(tabs)/Home');
           
   };
 

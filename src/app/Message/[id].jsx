@@ -29,7 +29,7 @@ const ChatScreen = () => {
 
   useEffect(() => {
     setRecipient(state.ricever);
-      const fetchMessages = async () => {
+    const fetchMessages = async () => {
       const res = await ChatService.getChat(userId);
       if (res.data) {
         setMessages(res.data);
@@ -41,12 +41,12 @@ const ChatScreen = () => {
 
   useEffect(() => {
     if (flatListRef.current && messages.length > 0) {
-      setTimeout(() => flatListRef.current.scrollToIndex({ index: messages.length -1, animated: true }), 100);
+      setTimeout(() => flatListRef.current.scrollToIndex({ index: messages.length - 1, animated: true }), 100);
     }
   }, [messages]);
 
-  const Listenmessage = useCallback(()=>{
-     if (state.socket) {
+  const Listenmessage = useCallback(() => {
+    if (state.socket) {
       state.socket.on('msg', (message) => {
         if (message.sender?._id == userId) {
           setMessages((prevMessages) => [...prevMessages, message]);
@@ -55,26 +55,26 @@ const ChatScreen = () => {
     }
   }, [state.socket, userId])
 
-  const StopListen= useCallback(()=>{
-     state.socket?.off('msg');
-  }, [state.socket])
+  const StopListen = useCallback(() => {
+    state.socket?.off('msg');
+  }, [state.socket]);
 
   useEffect(() => {
-    
+
     setIsOnline(state.onlineusers.includes(userId));
     Listenmessage();
 
     return () => {
       StopListen();
     }
-  }, [state.onlineusers, Listenmessage , StopListen]);
+  }, [state.onlineusers, Listenmessage, StopListen]);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
-      base64:true
+      base64: true
     });
 
     if (!result.canceled) {
@@ -89,11 +89,11 @@ const ChatScreen = () => {
     messageData.append('content', newMessage);
 
     if (selectedImage) {
-      messageData.append('file',{
-        uri:selectedImage.uri,
-        fileName:selectedImage.fileName,
-        type:selectedImage.mimeType
-      } );
+      messageData.append('file', {
+        uri: selectedImage.uri,
+        name: selectedImage.fileName,
+        type: selectedImage.mimeType
+      });
     }
 
     const res = await ChatService.sendChat(userId, messageData);
@@ -129,7 +129,7 @@ const ChatScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={[styles.messageContainer, item.sender?._id === state.user._id ? styles.myMessage : styles.theirMessage]}>
-      {item.content ? <Text style={item.sender?._id === state.user._id ? styles.messageText : { color: '#fff', fontSize: 16 }}>{item.content}</Text> : null}
+      {item.content && <Text style={item.sender?._id === state.user._id ? styles.messageText : { color: '#fff', fontSize: 16 }}>{item.content}</Text>}
       {item.file && <Image source={{ uri: item.file }} style={styles.messageImage} />}
       <Text style={styles.timestamp}>{formatTimestamp(item.createdAt)}</Text>
     </View>
@@ -140,7 +140,11 @@ const ChatScreen = () => {
       <View style={styles.header}>
         {recipient && (
           <>
-            <Image source={{ uri: recipient?.avatar }} style={styles.avatar} />
+            <TouchableOpacity onPress={() => {
+              dispatch({ type: "SET_visitor", payload: { visitor: recipient } });
+              router.navigate(`/Profiles/${recipient._id}`);
+            }} >
+              <Image source={{ uri: recipient?.avatar }} style={styles.avatar} /></TouchableOpacity>
             <View>
               <Text style={styles.headerName}>{recipient?.name}</Text>
               <Text style={styles.headerStatus}>{isOnline ? 'Online' : 'Offline'}</Text>
