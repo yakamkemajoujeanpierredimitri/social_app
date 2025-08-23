@@ -3,7 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MessageSkeleton from '../../component/MessageSkeleton';
 import { useAuth } from '../../context/authProvider';
 import ChatService from '../../service/chatService';
@@ -18,6 +18,8 @@ const ChatScreen = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [imageForModal, setImageForModal] = useState(null);
   const router = useRouter();
   const flatListRef = useRef(null);
 
@@ -136,7 +138,14 @@ const ChatScreen = () => {
   const renderItem = ({ item }) => (
     <View style={[styles.messageContainer, item.sender?._id === state.user._id ? styles.myMessage : styles.theirMessage]}>
       {item.content && <Text style={item.sender?._id === state.user._id ? styles.messageText : { color: '#fff', fontSize: 16 }}>{item.content}</Text>}
-      {item.file && <Image source={{ uri: item.file }} style={styles.messageImage} />}
+      {item.file && (
+        <TouchableOpacity onPress={() => {
+          setImageForModal(item.file);
+          setModalVisible(true);
+        }}>
+          <Image source={{ uri: item.file }} style={styles.messageImage} />
+        </TouchableOpacity>
+      )}
       <Text style={styles.timestamp}>{formatTimestamp(item.createdAt)}</Text>
     </View>
   );
@@ -192,6 +201,28 @@ const ChatScreen = () => {
           <Text style={styles.sendButtonText}>{isSending ? 'Sending...' : 'Send'}</Text>
         </TouchableOpacity>
       </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Feather name="x" size={30} color="white" />
+            </TouchableOpacity>
+            <ScrollView maximumZoomScale={3} minimumZoomScale={1} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+              <Image source={{ uri: imageForModal }} style={styles.modalImage} />
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
@@ -305,6 +336,31 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 12,
     padding: 2,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.8)',
+  },
+  modalView: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: "black",
+    alignItems: "center",
+    justifyContent: 'center'
+  },
+  modalImage: {
+    width: '100%',
+    aspectRatio:  1/ 1,
+    resizeMode: 'fill',
+    objectFit: 'contain'
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 1,
   },
 });
 
