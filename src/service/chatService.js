@@ -6,13 +6,12 @@ sendChat : async (id ,data)=>{
         const res = await apiClient.post(`/message/${id}?app=true`,data,{
             headers:{'Content-Type':'multipart/form-data'}
         });
-        console.log(res.data);
+        //console.log(res.data);
         return {data:res.data};
     } catch (error) {
          //console.error( error);
-        const errorMessage = error.response?.data?.message || 'File upload failed';
-        console.log(errorMessage.error.message);
-        return {msg:errorMessage.error.message};
+        const errorMessage = error.response?.data?.message?.error?.message ||  error.response?.data?.message || 'File upload failed';
+        return {msg:errorMessage};
     }
 },
 getChat:async (id)=>{

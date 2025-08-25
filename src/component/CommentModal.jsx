@@ -56,7 +56,12 @@ useEffect(()=>{
       <Text style={styles.commentText}>{item.content}</Text>
     </View>
   );
-
+  const NoItem = () => (
+    <View style={styles.noCommentsContainer}>
+      <Ionicons name="chatbubble-ellipses" size={50} color="#666" />
+      <Text style={styles.noCommentsText}>No comments yet</Text>
+    </View>
+  );
   return (
     <Modal
       animationType="slide"
@@ -74,6 +79,7 @@ useEffect(()=>{
             data={comments}
             renderItem={renderItem}
             keyExtractor={(item) => item._id}
+            ListEmptyComponent={() => <NoItem />}
           />
           <View style={styles.inputContainer}>
             <TextInput
@@ -152,7 +158,18 @@ const styles = StyleSheet.create({
     textAlign:'center',
     fontSize:25,
     fontWeight:'bold'
-  }
+  },
+  noCommentsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  noCommentsText: {
+    color: '#666',
+    fontSize: 18,
+  },
+
 });
 
 export default CommentModal;

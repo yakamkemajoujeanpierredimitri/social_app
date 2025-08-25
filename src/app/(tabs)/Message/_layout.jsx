@@ -1,12 +1,34 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, usePathname, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../../context/authProvider';
 
 const CustomHeader = () => {
   const router = useRouter();
   const pathname = usePathname();
-
+  const { state } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
   const isProfiles = pathname.includes('Profiles');
+
+  useEffect(() => {
+    Listenmessage();
+    return () => {
+      StopListen();
+    };
+  }, [Listenmessage, StopListen]);
+
+  const Listenmessage = useCallback(() => {
+    if (state.socket) {
+      state.socket.on('msg', (message) => {
+      setUnreadCount((prevCount) => prevCount + 1);
+      });
+    }
+  }, [state.socket]);
+
+  const StopListen = useCallback(() => {
+    state.socket?.off('msg');
+  }, [state.socket]);
 
   return (
     <View style={styles.headerContainer}>
@@ -15,7 +37,14 @@ const CustomHeader = () => {
       </TouchableOpacity>
       <Text style={styles.headerTitle}>{isProfiles ? 'Profiles' : 'Discussions'}</Text>
       <TouchableOpacity onPress={() => router.push(isProfiles ? '/(tabs)/Message/Discussions' : '/(tabs)/Message/Profiles')} style={styles.iconButton}>
-        <Ionicons name={isProfiles ? "chatbubble-ellipses-outline" : "people-outline"} size={24} color="#ffd700" />
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Ionicons name={isProfiles ? "chatbubble-ellipses-outline" : "people-outline"} size={24} color="#ffd700" />
+          {unreadCount > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{unreadCount}</Text>
+            </View>
+          )}
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -29,7 +58,7 @@ export default function MessageLayout() {
         headerShown: true,
       }}
     >
-      <Stack.Screen name="Profiles"  />
+      <Stack.Screen name="Profiles" />
       <Stack.Screen name="Discussions" />
     </Stack>
   );
@@ -52,6 +81,20 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: '#fff',
     fontSize: 20,
+    fontWeight: 'bold',
+  },
+  badge: {
+    backgroundColor: 'red',
+    borderRadius: 10,
+    width: 13,
+    height: 13,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    alignSelf:'flex-start'
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 9,
     fontWeight: 'bold',
   },
 });

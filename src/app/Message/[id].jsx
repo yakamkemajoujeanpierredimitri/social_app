@@ -29,7 +29,7 @@ const ChatScreen = () => {
       flatListRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: true });
     });
   };
-
+  //console.log(state.user?._id);
   useEffect(() => {
     setRecipient(state.ricever);
     const fetchMessages = async () => {
@@ -63,14 +63,15 @@ const ChatScreen = () => {
   }, [state.socket]);
 
   useEffect(() => {
-
-    setIsOnline(state.onlineusers.includes(userId));
     Listenmessage();
-
     return () => {
       StopListen();
     }
-  }, [state.onlineusers, Listenmessage, StopListen]);
+  }, [ Listenmessage, StopListen]);
+  useEffect(()=>{
+  
+    setIsOnline(state.onlineusers.includes(userId));
+  },[state.onlineusers]);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -117,22 +118,8 @@ const ChatScreen = () => {
   const formatTimestamp = (timestamp) => {
     const now = moment();
     const postTime = moment(timestamp);
-    const diffSeconds = now.diff(postTime, 'seconds');
-    const diffMinutes = now.diff(postTime, 'minutes');
-    const diffHours = now.diff(postTime, 'hours');
-    const diffDays = now.diff(postTime, 'days');
-
-    if (diffSeconds < 60) {
-      return `${diffSeconds}s`;
-    } else if (diffMinutes < 60) {
-      return `${diffMinutes}m`;
-    } else if (diffHours < 24) {
-      return `${diffHours}h`;
-    } else if (diffDays < 7) {
-      return `${diffDays}d`;
-    } else {
-      return postTime.format('MMM D');
-    }
+   
+    return postTime.calendar();
   };
 
   const renderItem = ({ item }) => (

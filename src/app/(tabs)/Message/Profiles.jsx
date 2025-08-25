@@ -63,6 +63,7 @@ const ProfilesScreen = () => {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.profileItem} onPress={() => handleProfilePress(item)}>
             <Image source={{ uri: item.avatar }} style={styles.profileImage} />
+            {onlineUsers.includes(item._id) && <Text style={styles.badge} ></Text>}
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>{item.name}</Text>
               <Text style={styles.profileStatus}>{onlineUsers.includes(item._id) ? 'Online' : 'Offline'}</Text>
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 15,
+    marginRight:1,
   },
   profileInfo: {
     flex: 1,
@@ -139,7 +140,17 @@ const styles = StyleSheet.create({
     fontSize: 30,
     textAlign: 'center'
 
-  }
+  },
+  badge: {
+
+    backgroundColor: "yellow",
+    borderRadius: 10,
+    width: 10,
+    height: 10,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    marginRight:15
+  },
 });
 
 export default ProfilesScreen;

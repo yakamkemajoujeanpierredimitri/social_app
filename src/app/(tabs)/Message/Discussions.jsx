@@ -10,6 +10,8 @@ const DiscussionsScreen = () => {
   const { state, dispatch } = useAuth();
   const [recentChats, setRecentChats] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +24,9 @@ const DiscussionsScreen = () => {
     };
     fetchRecentChats();
   }, []);
+useEffect(() => {
+    setOnlineUsers(state.onlineusers);
+  }, [state.onlineusers]);
 
   const handleChatPress = (chat) => {
     dispatch({ type: 'SET_Guest', payload: { ricever: chat } });
@@ -60,6 +65,7 @@ const DiscussionsScreen = () => {
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.chatItem} onPress={() => handleChatPress(item.sender?._id === state.user?._id ? item.receiver : item.sender)}>
               <Image source={item.sender?._id === state.user?._id ? { uri: item.receiver.avatar } : { uri: item.sender.avatar }} style={styles.profileImage} />
+              {onlineUsers.includes(item.sender?._id === state.user?._id ? item.receiver._id : item.sender._id) && <Text style={styles.badge} ></Text>}
               <View style={styles.chatInfo}>
                 <Text style={styles.profileName}>{item.sender?._id === state.user?._id ? item.receiver.name : item.sender.name}</Text>
                 <Text style={styles.lastMessage}>{item.content || "image..."}</Text>
@@ -89,7 +95,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 15,
+    marginRight: 1,
   },
   chatInfo: {
     flex: 1,
@@ -106,6 +112,16 @@ const styles = StyleSheet.create({
   timestamp: {
     color: '#999',
     fontSize: 12,
+  },
+   badge: {
+
+    backgroundColor: "yellow",
+    borderRadius: 10,
+    width: 10,
+    height: 10,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    marginRight:15
   },
 });
 
