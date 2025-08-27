@@ -160,9 +160,48 @@ export const AuthProvider = ({ children }) => {
     });
     return {success:true};
   }
+  const LoginWithGoogle = async (accessToken) => {
+    dispatch({ type: 'LOGIN_START' });
+    const res = await AuthService.loginWithGoogle(accessToken);
+    if (res?.msg) {
+      dispatch({
+        type: "LOGIN_ERROR",
+        payload: res.msg
+      });
+      return {msg:res.msg};
+    }
+    delete res.data.accessToken;
+    delete res.data.refreshToken;
+    Connect(res.data._id);
+    dispatch({
+      type: "LOGIN_SUCCESS",
+      payload: { user: res.data }
+    });
+    return {success:true};
+  }
   const Register = async (data) => {
     dispatch({ type: 'REGISTER_START' });
     const res = await AuthService.register(data);
+    if (res?.msg) {
+      //console.log(res.msg);
+      dispatch({
+        type: "REGISTER_ERROR",
+        payload: res.msg
+      });
+      return{msg : res.msg} ;
+    }
+    delete res.data.accessToken;
+    delete res.data.refreshToken;
+    Connect(res.data._id);
+    dispatch({
+      type: "REGISTER_SUCCESS",
+      payload: { user: res.data }
+    });
+    return {success:true};
+  }
+    const SignupWithGoogle = async (accessToken) => {
+    dispatch({ type: 'REGISTER_START' });
+    const res = await AuthService.SignupWithGoogle(accessToken);
     if (res?.msg) {
       //console.log(res.msg);
       dispatch({
@@ -190,6 +229,7 @@ export const AuthProvider = ({ children }) => {
       state.socket.disconnect();
     }
     dispatch({ type: 'LOGOUT' });
+    return {success:true};
    
   }
   const Connect = (id)=>{
@@ -238,7 +278,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ state, dispatch, Login, Register, Logout }}>
+    <AuthContext.Provider value={{ state, dispatch, Login, Register, Logout, LoginWithGoogle , SignupWithGoogle}}>
       {children}
     </AuthContext.Provider>
   );

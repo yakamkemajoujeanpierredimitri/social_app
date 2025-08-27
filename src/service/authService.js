@@ -30,6 +30,7 @@ const AuthService = {
   logout: async () => {
     try {
       await TokenService.clearAllTokens();
+      return {success:true};
       //await AsyncStorage.removeItem('userData');
     } catch (error) {
       console.error( error);
@@ -46,6 +47,28 @@ const AuthService = {
       const errorMessage = error.response?.data?.message || 'Check authentication failed';
       return {msg:errorMessage};
         
+    }
+  },
+  loginWithGoogle: async (accessToken) => {
+    try {
+      const response = await apiClient.post('/auth/google/callback/login', { accessToken: accessToken });
+      await TokenService.setToken('userToken', response.data.accessToken);
+      return {data: response.data};
+    } catch (error) {
+      console.error('AuthService.loginWithGoogle error:', error);
+      const errorMessage = error.response?.data?.message || 'Google login failed';
+      return {msg:errorMessage};
+    }
+  },
+  SignupWithGoogle: async (accessToken) => {
+    try {
+      const response = await apiClient.post('/auth/google/callback/signup', { accessToken: accessToken });
+      await TokenService.setToken('userToken', response.data.accessToken);
+      return {data: response.data};
+    } catch (error) {
+      console.error('AuthService.loginWithGoogle error:', error);
+      const errorMessage = error.response?.data?.message || 'Google login failed';
+      return {msg:errorMessage};
     }
   }
 };

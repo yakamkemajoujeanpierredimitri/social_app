@@ -1,12 +1,25 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { StatusBar } from "react-native";
-import { AppProvider } from '../context/authProvider';
-export default function RootLayout() {
-  
+import { AppProvider, useAuth } from '../context/authProvider';
+
+function RootLayoutNav() {
+  const { state } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleNavigation = async () => {
+      const currentRoute = router.pathname;
+      if (!state.isAuthenticated && currentRoute !== '/offline' && currentRoute !== '/auth/signup') {
+        router.replace('/auth');
+      } else if (state.isAuthenticated) {
+        router.replace('/(tabs)/Home');
+      }
+    };
+    handleNavigation();
+  }, [state.isAuthenticated, router.pathname]);
+
   return (
-    
-    <AppProvider>
-      <>
     <Stack 
     
     screenOptions={{
@@ -19,7 +32,6 @@ export default function RootLayout() {
     }}
     >
 
-      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="auth" options={{ headerShown: false }} />
       <Stack.Screen name="add" options={{ headerShown: false }} />
@@ -28,8 +40,18 @@ export default function RootLayout() {
       <Stack.Screen name="Profiles" options={{ headerShown: true }} />
       <Stack.Screen name="offline" options={{ headerShown: false }} />
     </Stack>
-    <StatusBar barStyle={'light-content'} />
-    </>
+  );
+}
+
+export default function RootLayout() {
+
+  return (
+    
+    <AppProvider>
+      <>
+        <RootLayoutNav />
+        <StatusBar barStyle={'light-content'} />
+      </>
     </AppProvider>
     
     

@@ -1,6 +1,9 @@
+import { FontAwesome } from '@expo/vector-icons';
+import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import LottieView from 'lottie-react-native';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -13,13 +16,52 @@ import {
 } from 'react-native';
 import { useAuth } from '../../context/authProvider';
 
+import { useNavigation } from '@react-navigation/native';
 
-const LoginScreen = ({ navigation }) => {
+WebBrowser.maybeCompleteAuthSession();
+
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { state , Login  ,dispatch} = useAuth();
+  const { state, Login, dispatch, LoginWithGoogle } = useAuth();
   const animationRef = useRef(null);
   const router = useRouter();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // Allow navigation to signup page
+      if (e.data.action.type === 'NAVIGATE' && e.data.action.payload.name === 'signup') {
+        return;
+      }
+
+      if (!state.isAuthenticated) {
+        // Prevent default behavior of leaving the screen
+        e.preventDefault();
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, state.isAuthenticated]);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    expoClientId: process.env.EXPO_PUBLIC_EXPO_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID,
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      LoginWithGoogle(authentication.accessToken).then(res => {
+        if (res.success) {
+          router.navigate('/(tabs)/Home');
+        }
+      });
+    }
+  }, [response]);
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
@@ -85,6 +127,15 @@ const LoginScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={[styles.loginButton, styles.googleButton]}
+          onPress={() => promptAsync()}
+          disabled={!request || state.isLoading}
+        >
+          <FontAwesome name="google" size={20} color="#fff" style={styles.googleIcon} />
+          <Text style={styles.loginButtonText}>Sign in with Google</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={styles.registerLink}
           onPress={() => {
             dispatch({ type: 'CLEAR_ERROR' });
@@ -140,6 +191,15 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 10,
     marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  googleButton: {
+    backgroundColor: '#4285F4',
+  },
+  googleIcon: {
+    marginRight: 10,
   },
   disabledButton: {
     opacity: 0.6,

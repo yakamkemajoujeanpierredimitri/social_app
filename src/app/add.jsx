@@ -1,3 +1,4 @@
+import { useNetInfo } from '@react-native-community/netinfo';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library';
@@ -6,6 +7,7 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useAuth } from '../context/authProvider';
 import { useFile } from '../context/fileProvider';
 import FileService from '../service/fileService';
 
@@ -21,6 +23,19 @@ const CreatePostScreen = () => {
   const videoRef = useRef(null);
   const player  = useVideoPlayer(media);
  const [uploadProgress, setUploadProgress] = useState(0);
+  const netinfo = useNetInfo();
+  const {state:authstate} = useAuth();
+  useEffect(()=>{
+    if (netinfo.isConnected === false) {
+      Alert.alert("No Internet Connection", "Please check your network settings.");
+      router.navigate('/offline');
+      return ;
+    }
+    if( authstate.isAuthenticated === false){
+      router.navigate('/auth');
+      return ;
+    }
+  }, [netinfo.isConnected , authstate.isAuthenticated]);
   // Request media library permissions
   useEffect(() => {
     (async () => {

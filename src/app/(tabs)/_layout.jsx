@@ -1,7 +1,9 @@
 import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { useNetInfo } from "@react-native-community/netinfo";
 import { Tabs, useRouter } from "expo-router";
-import React from "react";
-import { TouchableOpacity } from "react-native";
+import React, { useEffect } from "react";
+import { Alert, TouchableOpacity } from "react-native";
+import { useAuth } from "../../context/authProvider";
 const AddBtn = ()=>{
     const router = useRouter();
     return(
@@ -13,12 +15,23 @@ const AddBtn = ()=>{
         /></TouchableOpacity>
     )
 }
-const Tablayout = React.memo(() => (
-    <Tabs
-    
-        screenOptions={({ route }) => ({
-            tabBarIcon: ({ focused, color, size }) => {
-                let iconName;
+const Tablayout = React.memo(() => {
+    const router = useRouter();
+    const netInfo = useNetInfo();
+    const { state , dispatch} = useAuth();
+    useEffect(() => {
+        if (netInfo.isConnected === false) {
+            Alert.alert("No Internet Connection", "Please check your network settings.");
+            router.navigate('/offline');
+            return ;
+        }
+    }, [netInfo.isConnected]);
+    return (
+        <Tabs
+
+            screenOptions={({ route }) => ({
+                tabBarIcon: ({ focused, color, size }) => {
+                    let iconName;
                 switch (route.name) {
                     case "Home":
                         iconName = focused ? "home" : "home";
@@ -59,7 +72,7 @@ const Tablayout = React.memo(() => (
         <Tabs.Screen name="Camera" />
         <Tabs.Screen name="Profile"  />
         <Tabs.Screen name="Message" options={{ headerShown: true }} />
-    </Tabs>
-));
+    </Tabs>)
+});
 
 export default Tablayout;

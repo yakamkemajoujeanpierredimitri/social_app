@@ -147,7 +147,10 @@ const Profile = () => {
       console.log(res.msg);
       return;
     }
-    router.navigate('/auth');
+    if(res?.success === true){
+       router.navigate('/auth');
+    }
+   
   }
 
   const renderPostItem = ({ item }) => (

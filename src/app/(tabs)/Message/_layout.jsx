@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNetInfo } from '@react-native-community/netinfo';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -10,7 +11,18 @@ const CustomHeader = () => {
   const { state } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const isProfiles = pathname.includes('Profiles');
-
+  const netinfo = useNetInfo();
+  useEffect(()=>{
+    if (netinfo.isConnected === false) {
+      Alert.alert("No Internet Connection", "Please check your network settings.");
+      router.navigate('/offline');
+      return ;
+    }
+    if( state.isAuthenticated === false){
+      router.navigate('/auth');
+      return ;
+    }
+  }, [netinfo.isConnected , state.isAuthenticated]);
   useEffect(() => {
     Listenmessage();
     return () => {
