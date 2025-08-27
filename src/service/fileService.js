@@ -116,7 +116,7 @@ const FileService = {
             return { msg: errorMessage };
         }
     },
-    getAlgoFiles: async (dispatch) => {
+    getAlgoFiles: async (dispatch , currentPage) => {
         // Implement logic to retrieve files related to a specific algorithm
         
         dispatch({
@@ -128,12 +128,11 @@ const FileService = {
                 type: 'FETCH_VIDEO_SUCCESS',
                 payload: { file: res.data[0] }
             });
+            return{data:res.data};
         } catch (error) {
+            console.log(error);
             const errorMessage = error.response?.data?.message || 'File retrieval failed';
-            dispatch({
-                type: 'FETCH_VIDEO_ERROR',
-                payload: errorMessage
-            });
+            return { msg: errorMessage };
         }
     },
     addObservation: async ( dispatch, id, data) => {

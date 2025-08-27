@@ -15,7 +15,7 @@ if (Platform.OS === 'android') {
 }
 
 const Profile = () => {
-  const { state, dispatch } = useAuth();
+  const { state, dispatch ,Logout } = useAuth();
   const { user } = state;
   const router = useRouter();
   const [followers, setFollowers] = useState([]);
@@ -141,6 +141,14 @@ const Profile = () => {
     setUserListTitle('Following');
     setModalVisible(true);
   };
+  const LoggingOut = async ()=>{
+    const res = await Logout();
+    if(res?.msg){
+      console.log(res.msg);
+      return;
+    }
+    router.navigate('/auth');
+  }
 
   const renderPostItem = ({ item }) => (
     <View style={styles.postItem}>
@@ -174,9 +182,15 @@ const Profile = () => {
             <Text style={styles.statLabel}>Following</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
+        <View style={{flexDirection:'row',gap:10}}>
+           <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
+         <TouchableOpacity style={styles.editButton} onPress={() => LoggingOut()}>
+          <Text style={styles.editButtonText}>logout</Text>
+        </TouchableOpacity> 
+        </View>
+      
       </View>
 
       <View style={styles.tabBar}>

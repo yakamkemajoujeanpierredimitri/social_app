@@ -32,7 +32,7 @@ const AuthService = {
       await TokenService.clearAllTokens();
       //await AsyncStorage.removeItem('userData');
     } catch (error) {
-      console.error('AuthService.logout error:', error);
+      console.error( error);
       const errorMessage = error.response?.data?.message || 'Logout failed';
       return {msg:errorMessage};
     }

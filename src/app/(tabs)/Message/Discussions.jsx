@@ -64,7 +64,7 @@ useEffect(() => {
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.chatItem} onPress={() => handleChatPress(item.sender?._id === state.user?._id ? item.receiver : item.sender)}>
-              <Image source={item.sender?._id === state.user?._id ? { uri: item.receiver.avatar } : { uri: item.sender.avatar }} style={styles.profileImage} />
+              <Image source={item.sender?._id === state.user?._id ? { uri: item.receiver.avatar } : { uri: item.sender.avatar }} style={ [styles.profileImage , { marginRight: onlineUsers.includes(item.sender?._id === state.user?._id ? item.receiver._id : item.sender._id) ? 1 : 15 }]} />
               {onlineUsers.includes(item.sender?._id === state.user?._id ? item.receiver._id : item.sender._id) && <Text style={styles.badge} ></Text>}
               <View style={styles.chatInfo}>
                 <Text style={styles.profileName}>{item.sender?._id === state.user?._id ? item.receiver.name : item.sender.name}</Text>
@@ -95,7 +95,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 1,
   },
   chatInfo: {
     flex: 1,

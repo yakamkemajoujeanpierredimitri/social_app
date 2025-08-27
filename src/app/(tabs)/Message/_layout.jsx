@@ -20,7 +20,7 @@ const CustomHeader = () => {
 
   const Listenmessage = useCallback(() => {
     if (state.socket) {
-      state.socket.on('msg', (message) => {
+      state.socket?.on('msg', (message) => {
       setUnreadCount((prevCount) => prevCount + 1);
       });
     }

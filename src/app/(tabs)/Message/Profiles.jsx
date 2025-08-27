@@ -62,7 +62,7 @@ const ProfilesScreen = () => {
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.profileItem} onPress={() => handleProfilePress(item)}>
-            <Image source={{ uri: item.avatar }} style={styles.profileImage} />
+            <Image source={{ uri: item.avatar }} style={[styles.profileImage , { marginRight: onlineUsers.includes(item._id) ? 1 : 15 }]} />
             {onlineUsers.includes(item._id) && <Text style={styles.badge} ></Text>}
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>{item.name}</Text>
@@ -121,7 +121,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight:1,
   },
   profileInfo: {
     flex: 1,

@@ -26,6 +26,7 @@ export default function RootLayout() {
       <Stack.Screen name="watch" options={{ headerShown: false }} />
       <Stack.Screen name="Message" options={{ headerShown: true }} />
       <Stack.Screen name="Profiles" options={{ headerShown: true }} />
+      <Stack.Screen name="offline" options={{ headerShown: false }} />
     </Stack>
     <StatusBar barStyle={'light-content'} />
     </>

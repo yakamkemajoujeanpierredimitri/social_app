@@ -50,6 +50,7 @@ const LoginScreen = ({ navigation }) => {
           loop
         />
       </View>
+     
 
       <View style={styles.formContainer}>
         <Text style={styles.title}>Welcome Back</Text>

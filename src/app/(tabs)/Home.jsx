@@ -23,6 +23,7 @@ const HomePage = () => {
   const { state ,dispatch} = useFile();
   const [currentId ,setCurrentPostId] = useState(null);
   const [isScreenFocused, setIsScreenFocused] = useState(true);
+  const [refre,setRefreshing] = useState(false);
     useEffect(()=>{
         if (!isScreenFocused) {
             setCurrentPostId(null);
@@ -51,16 +52,21 @@ const HomePage = () => {
       let n = await AsyncStorage.getItem('currentpage');
       n = JSON.parse(n)|| 1;
       setCurrentpage(n);
+      //console.log('setcurrentpage when uploading file and state.current does not exist:', n);
+      }else{
+         setCurrentpage(state.currentPage);
+      //console.log('setcurrentpage when uploading file and state.current  exist:', state.currentPage);
       }
+      
       //console.log(res.data);
-      setCurrentpage(state.currentPage);
+     
       if (state.error) {
         Alert.alert('error',state.error);
         return;
       }
       setPost(res.data);
      // console.log(res.data);
-      console.log(currentpage);
+      ///console.log(currentpage);
     };
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -69,6 +75,8 @@ const HomePage = () => {
         type:'SET_Page',
         payload:{n:viewableItems[0].index+1}
       });
+      //console.log('setcurrentpage when on scrolling :', viewableItems[0].index);
+      setCurrentpage(viewableItems[0].index + 1);
       const currentId = viewableItems[0].item._id;
       setCurrentPostId(currentId);
     }else{
@@ -82,16 +90,27 @@ const HomePage = () => {
   };
 
   const handleRefresh = async () => {
+    dispatch({
+      type:'SET_REFRESHING',
+      payload:true
+    });
     setRefreshing(true);
     try {
-     const res =  await FileService.getAlgoFiles(dispatch);
-     if(state.error){
-        Alert.alert('Error',state.error);
+     const res =  await FileService.getAlgoFiles(dispatch , currentpage);
+     if(res.msg){
+        Alert.alert('Error',res.msg);
         return;
      }
-     setPost(res.data);
+     
+      //console.log(res.data);
+      setPost(res.data);
+     
     } finally {
       setRefreshing(false);
+         dispatch({
+      type:'SET_REFRESHING',
+      payload:false
+    });
     }
   };
 
@@ -99,7 +118,7 @@ const HomePage = () => {
 
   return (
     <View style={styles.container}>
-      {state.isLoading ? <LottieView
+      {state.isLoading || refre ? <LottieView
       source={require('../../assets/animation/load2.json')}
       autoPlay
       loop

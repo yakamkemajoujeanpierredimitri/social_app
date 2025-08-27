@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useReducer } from 'react';
 //import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNetInfo } from '@react-native-community/netinfo';
+import { useRouter } from 'expo-router';
 import { io } from 'socket.io-client';
 import AuthService from "../service/authService";
 import { VideoProvider } from './fileProvider';
-
 const AuthContext = createContext();
 
 const authInitialState = {
@@ -14,6 +15,7 @@ const authInitialState = {
   isAuthenticated: false,
   visitor:null,
   ricever:null,
+  isConnected: true,
   onlineusers:[]
 };
 
@@ -63,7 +65,13 @@ const authReducer = (state, action) => {
 
     case 'LOGOUT':
       return {
-        ...authInitialState,
+        ...state,
+        user: null,
+        isAuthenticated: false,
+        error:null,
+        onlineusers:[],
+        visitor:null,
+        ricever:null,
       };
 
     case 'CLEAR_ERROR':
@@ -102,6 +110,11 @@ const authReducer = (state, action) => {
         ...state,
         ricever:action.payload.ricever
       }
+    case 'SET_CONNECTION_STATUS':
+      return {
+        ...state,
+        isConnected: action.payload.isConnected,
+      };
     default:
       return state;
   }
@@ -109,6 +122,22 @@ const authReducer = (state, action) => {
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, authInitialState);
+  const netInfo = useNetInfo();
+  const router = useRouter()
+
+  useEffect(() => {
+    const handleConnectivityChange = () => {
+      if (netInfo.isConnected === false) {
+        router.push('/offline');
+      }
+      dispatch({
+        type: 'SET_CONNECTION_STATUS',
+        payload: { isConnected: netInfo.isConnected },
+      });
+    };
+
+    handleConnectivityChange();
+  }, [netInfo.isConnected]);
 
 
   const Login = async (data) => {
@@ -152,11 +181,15 @@ export const AuthProvider = ({ children }) => {
     return {success:true};
   }
   const Logout = async () => {
-    await AuthService.logout();
-    dispatch({ type: 'LOGOUT' });
-    if(state.socket){
-       state.socket.disconnect();
+     const res = await AuthService.logout();
+    if(res?.msg){
+      return {msg:res.msg};
     }
+    if(state.socket && typeof state.socket.off === 'function' && typeof state.socket.disconnect === 'function'){
+      state.socket.off('onlineusers');
+      state.socket.disconnect();
+    }
+    dispatch({ type: 'LOGOUT' });
    
   }
   const Connect = (id)=>{
