@@ -10,7 +10,7 @@ function RootLayoutNav() {
   useEffect(() => {
     const handleNavigation = async () => {
       const currentRoute = router.pathname;
-      if (!state.isAuthenticated && currentRoute !== '/offline' && currentRoute !== '/auth/signup') {
+      if (!state.isAuthenticated && currentRoute !== '/offline' && currentRoute !== '/auth/signup' && currentRoute !== '/auth') {
         router.replace('/auth');
       } else if (state.isAuthenticated) {
         router.replace('/(tabs)/Home');
@@ -31,7 +31,8 @@ function RootLayoutNav() {
       headerTintColor:'#fff'
     }}
     >
-
+    
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="auth" options={{ headerShown: false }} />
       <Stack.Screen name="add" options={{ headerShown: false }} />
