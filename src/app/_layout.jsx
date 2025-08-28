@@ -13,6 +13,7 @@ function RootLayoutNav() {
       if (!state.isAuthenticated && currentRoute !== '/offline' && currentRoute !== '/auth/signup' && currentRoute !== '/auth') {
         router.replace('/auth');
       } else if (state.isAuthenticated) {
+        
         router.replace('/(tabs)/Home');
       }
     };
