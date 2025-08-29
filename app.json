@@ -8,7 +8,7 @@
      "splash": {
       "image": "./src/assets/images/yak.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000"
     },
     "scheme": "socialapp",
     "userInterfaceStyle": "automatic",

@@ -36,7 +36,7 @@ if(!state.isLoading && state.isAuthenticated){
         <Text style={styles.title}>Welcome to Yakani App</Text>
         {!state.isLoading && !state.user && <TouchableOpacity 
           style={styles.button}
-          onPress={() => router.navigate('/auth')}
+          onPress={() => router.push('/auth')}
         >
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>}

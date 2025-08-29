@@ -40,7 +40,7 @@ const RegisterScreen = () => {
       const { authentication } = response;
       SignupWithGoogle(authentication.accessToken).then(res => {
         if (res.success) {
-          router.navigate('/(tabs)/Home');
+          router.push('/(tabs)/Home');
         }
       });
     }
@@ -85,7 +85,7 @@ const RegisterScreen = () => {
       Alert.alert('Registration Failed',  res?.msg);
     } 
     if(res?.success === true){
-      router.navigate('/(tabs)/Home');
+      router.push('/(tabs)/Home');
     }
     
   };
@@ -159,7 +159,7 @@ const RegisterScreen = () => {
           style={styles.loginLink}
           onPress={() => {
             dispatch({ type: 'CLEAR_ERROR' });
-            router.navigate('/auth');
+            router.push('/auth');
           }}
         >
           <Text style={styles.loginText}>

@@ -12,8 +12,7 @@ function RootLayoutNav() {
       const currentRoute = router.pathname;
       if (!state.isAuthenticated && currentRoute !== '/offline' && currentRoute !== '/auth/signup' && currentRoute !== '/auth') {
         router.replace('/auth');
-      } else if (state.isAuthenticated) {
-        
+      } else if (state.isAuthenticated && currentRoute !== '/(tabs)/Home') {
         router.replace('/(tabs)/Home');
       }
     };

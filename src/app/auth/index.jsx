@@ -56,7 +56,7 @@ const LoginScreen = () => {
       const { authentication } = response;
       LoginWithGoogle(authentication.accessToken).then(res => {
         if (res.success) {
-          router.navigate('/(tabs)/Home');
+          router.push('/(tabs)/Home');
         }
       });
     }
@@ -74,7 +74,7 @@ const LoginScreen = () => {
         return;
     } 
     if(res?.success === true){
-      router.navigate('/(tabs)/Home');
+      router.push('/(tabs)/Home');
     }          
   };
 
@@ -139,7 +139,7 @@ const LoginScreen = () => {
           style={styles.registerLink}
           onPress={() => {
             dispatch({ type: 'CLEAR_ERROR' });
-            router.navigate('/auth/signup');
+            router.push('/auth/signup');
           }}
         >
           <Text style={styles.registerText}>
