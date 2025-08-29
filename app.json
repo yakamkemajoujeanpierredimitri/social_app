@@ -5,10 +5,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/images/yak.png",
-     "splash": {
+    "splash": {
       "image": "./src/assets/images/yak.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000"
+      "backgroundColor": "#000000"
     },
     "scheme": "socialapp",
     "userInterfaceStyle": "automatic",
@@ -27,6 +27,10 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -81,6 +85,12 @@
       "eas": {
         "projectId": "60b64227-23a8-47d6-bfa0-b245daa1631f"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/60b64227-23a8-47d6-bfa0-b245daa1631f"
     }
   }
 }
