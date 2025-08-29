@@ -1,23 +1,24 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { AppProvider, useAuth } from '../context/authProvider';
-
 function RootLayoutNav() {
   const { state } = useAuth();
   const router = useRouter();
+  const navigation = usePathname();
 
   useEffect(() => {
     const handleNavigation = async () => {
-      const currentRoute = router.pathname;
+      const currentRoute = navigation;
+      console.log('Current route:', currentRoute, 'Authenticated:', state.isAuthenticated);
       if (!state.isAuthenticated && currentRoute !== '/offline' && currentRoute !== '/auth/signup' && currentRoute !== '/auth') {
         router.replace('/auth');
-      } else if (state.isAuthenticated && currentRoute !== '/(tabs)/Home') {
+      } else if (state.isAuthenticated && (currentRoute === '/auth' || currentRoute === '/auth/signup')) {
         router.replace('/(tabs)/Home');
       }
     };
     handleNavigation();
-  }, [state.isAuthenticated, router.pathname]);
+  }, [state.isAuthenticated, navigation]);
 
   return (
     <Stack 
