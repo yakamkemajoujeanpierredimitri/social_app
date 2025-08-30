@@ -27,7 +27,6 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "googleServicesFile": "./google-json.json",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
