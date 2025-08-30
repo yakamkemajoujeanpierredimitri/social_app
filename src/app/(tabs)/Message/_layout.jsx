@@ -15,11 +15,11 @@ const CustomHeader = () => {
   useEffect(()=>{
     if (netinfo.isConnected === false) {
       Alert.alert("No Internet Connection", "Please check your network settings.");
-      router.navigate('/offline');
+      router.push('/offline');
       return ;
     }
     if( state.isAuthenticated === false){
-      router.navigate('/auth');
+      router.push('/auth');
       return ;
     }
   }, [netinfo.isConnected , state.isAuthenticated]);

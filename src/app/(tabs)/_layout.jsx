@@ -22,7 +22,7 @@ const Tablayout = React.memo(() => {
     useEffect(() => {
         if (netInfo.isConnected === false) {
             Alert.alert("No Internet Connection", "Please check your network settings.");
-            router.navigate('/offline');
+            router.push('/offline');
             return ;
         }
     }, [netInfo.isConnected]);
