@@ -1,14 +1,17 @@
 import * as SecureStore from 'expo-secure-store';
-
+import moment from 'moment';
 export const STORAGE_KEYS = {
-  AUTH_TOKEN: 'authToken',
+  AUTH_TOKEN: 'userToken',
   REFRESH_TOKEN: 'refreshToken'
 };
 
 export const TokenService = {
   setToken: async (key, value) => {
     try {
+      const time = moment.defaultFormat();
       await SecureStore.setItemAsync(key, value);
+      await SecureStore.setItemAsync('time',time);
+      await SecureStore.setItemAsync('isvalid','true');
       return true;
     } catch (error) {
       console.error('TokenService.setToken error:', error);
@@ -39,6 +42,8 @@ export const TokenService = {
     try {
       await SecureStore.deleteItemAsync(STORAGE_KEYS.AUTH_TOKEN);
       await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
+      await SecureStore.deleteItemAsync('time');
+      await SecureStore.deleteItemAsync('isvalid');
       return true;
     } catch (error) {
       console.error('TokenService.clearAllTokens error:', error);

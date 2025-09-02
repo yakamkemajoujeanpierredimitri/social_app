@@ -1,24 +1,45 @@
 import { useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
-import React, { useEffect, useRef } from 'react';
+import moment from 'moment';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useAuth } from '../context/authProvider';
+import { TokenService } from '../service/Security';
 
 const HomeScreen = () => {
   const animationRef = useRef(null);
   const router  = useRouter();
-  const {state} = useAuth();
+  const [isLoading , setisLoading] = useState(false);
+  const [isvalid ,setisValid] = useState(false);
   useEffect(() => {
     animationRef.current?.play();
-    if(state.isAuthenticated){
-      router.navigate('/(tabs)/Home');
-    }
+      HandleEntering();
   }, []);
-useEffect(()=>{
-if(!state.isLoading && state.isAuthenticated){
-   router.navigate('/(tabs)/Home');
-}
-},[state.isLoading])
+
+    const HandleEntering  = async ()=>{
+      setisLoading(true);
+      try {
+        const res = await TokenService.getToken('isvalid');
+        if(res === null){
+          return;
+        }
+        const time  = await TokenService.getToken('time');
+        if(time === null){
+          return;
+        }
+        console.log('time:', time);
+        const diff  = moment(time).fromNow();
+        console.log('diff:', diff);
+        if(diff.includes('months') || diff.includes('years') ){
+          return;
+        }
+        setisValid(true);
+        router.push('/(tabs)/Home');
+      } catch (error) {
+        console.log(error);
+      }finally{
+        setisLoading(false);
+      }
+    }
   return (
     <View style={styles.container}>
       {/* Lottie Animation Background */}
@@ -34,7 +55,7 @@ if(!state.isLoading && state.isAuthenticated){
       {/* Content */}
       <View style={styles.content}>
         <Text style={styles.title}>Welcome to Yakani App</Text>
-        {!state.isLoading && !state.user && <TouchableOpacity 
+        {!isLoading && !isvalid && <TouchableOpacity 
           style={styles.button}
           onPress={() => router.push('/auth')}
         >
