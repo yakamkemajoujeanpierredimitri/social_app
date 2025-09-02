@@ -13,7 +13,8 @@
         "buildType": "apk"
       },
         "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "GOOGLE_SERVICES_JSON": "./google-services.json"
       }
     },
     "production": {

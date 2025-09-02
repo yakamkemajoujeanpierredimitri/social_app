@@ -8,7 +8,7 @@ export const STORAGE_KEYS = {
 export const TokenService = {
   setToken: async (key, value) => {
     try {
-      const time = moment.defaultFormat();
+      const time = moment().format();
       await SecureStore.setItemAsync(key, value);
       await SecureStore.setItemAsync('time',time);
       await SecureStore.setItemAsync('isvalid','true');
