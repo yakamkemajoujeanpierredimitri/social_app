@@ -91,14 +91,13 @@ const authReducer = (state, action) => {
     case "Check_finish":
       return {
         ...state,
-        isLoading: false,
         isAuthenticated: action.payload.user !== null ? true : false,
         user: action.payload.user || null,
       };
-    case "Check_start":
+    case "Valid":
       return {
         ...state,
-        isLoading: true,
+        isAuthenticated:true,
       };
     case'SET_visitor':
       return{
@@ -255,9 +254,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       if (state.isAuthenticated) return;
-      dispatch({
-        type: "Check_start"
-      });
       const res = await AuthService.checkAuth();
       if (res?.msg) {
         console.log(res.msg);

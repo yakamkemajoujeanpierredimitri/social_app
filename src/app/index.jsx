@@ -3,11 +3,13 @@ import LottieView from 'lottie-react-native';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../context/authProvider';
 import { TokenService } from '../service/Security';
 
 const HomeScreen = () => {
   const animationRef = useRef(null);
   const router  = useRouter();
+  const {dispatch} = useAuth();
   const [isLoading , setisLoading] = useState(false);
   const [isvalid ,setisValid] = useState(false);
   useEffect(() => {
@@ -32,8 +34,11 @@ const HomeScreen = () => {
         if(diff.includes('months') || diff.includes('years') ){
           return;
         }
+        dispatch({
+          type:'Valid'
+        });
         setisValid(true);
-        router.push('/(tabs)/Home');
+        //router.push('/(tabs)/Home');
       } catch (error) {
         console.log(error);
       }finally{
