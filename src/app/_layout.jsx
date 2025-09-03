@@ -13,7 +13,7 @@ function RootLayoutNav() {
       console.log('Current route:', currentRoute, 'Authenticated:', state.isAuthenticated);
       if (!state.isAuthenticated && currentRoute !== '/offline' && currentRoute !== '/auth/signup' && currentRoute !== '/auth') {
         router.replace('/auth');
-      } else if (state.isAuthenticated && (currentRoute === '/auth' || currentRoute === '/auth/signup') && currentRoute !== '/(tabs)/Home') {
+      } else if (state.isAuthenticated && (currentRoute === '/auth' || currentRoute === '/auth/signup') ) {
         router.replace('/(tabs)/Home');
       }
     };
