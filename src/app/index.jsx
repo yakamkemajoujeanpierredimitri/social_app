@@ -38,7 +38,7 @@ const HomeScreen = () => {
           type:'Valid'
         });
         setisValid(true);
-        //router.push('/(tabs)/Home');
+        router.push('/(tabs)/Home');
       } catch (error) {
         console.log(error);
       }finally{
