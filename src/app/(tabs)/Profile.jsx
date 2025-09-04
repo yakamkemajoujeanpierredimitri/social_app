@@ -174,7 +174,7 @@ const Profile = () => {
     return(
       <View style={styles.container}>
         <Ionicons
-        name='avatar'
+        name='person'
         size={52}
         color={'#FFD700'}
         style={{alignContent:'center' , alignItems:'center'}}

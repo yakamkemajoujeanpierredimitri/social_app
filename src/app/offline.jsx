@@ -3,7 +3,6 @@ import NetInfo from '@react-native-community/netinfo';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
-
 const OfflinePage = () => {
   const [min, setMin] = useState('');
   const [max, setMax] = useState('');
@@ -78,7 +77,7 @@ const OfflinePage = () => {
           />
         </View>
         <Button title="Start Game" onPress={handleStartGame} />
-
+        
         {numberToGuess !== null && (
           <View style={styles.guessContainer}>
             <TextInput
