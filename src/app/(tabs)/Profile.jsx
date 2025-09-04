@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -16,7 +17,7 @@ if (Platform.OS === 'android') {
 
 const Profile = () => {
   const { state, dispatch ,Logout } = useAuth();
-  const { user } = state;
+  const { user} = state;
   const router = useRouter();
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
@@ -169,7 +170,19 @@ const Profile = () => {
       )}
     </View>
   );
-
+  if(user === null){
+    return(
+      <View style={styles.container}>
+        <Ionicons
+        name='avatar'
+        size={52}
+        color={'#FFD700'}
+        style={{alignContent:'center' , alignItems:'center'}}
+        />
+        <Text style={styles.LoadingText}>Loading....</Text>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
@@ -424,6 +437,12 @@ const styles = StyleSheet.create({
     color:'#fff',
     fontSize:20,
     fontWeight: 'bold',
+  },
+  LoadingText:{
+    textAlign:'center',
+    margin:20,
+    fontSize:20,
+    color:"#fff"
   }
 });
 

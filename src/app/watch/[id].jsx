@@ -1,11 +1,11 @@
 
+import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Fullmain from '../../component/Fullmain';
 import { useFile } from '../../context/fileProvider';
 import FileService from '../../service/fileService';
-import { AntDesign } from '@expo/vector-icons';
 
 const WatchPage = () => {
     const { id } = useLocalSearchParams();
@@ -30,6 +30,9 @@ const WatchPage = () => {
     if (state.error) {
         return (
             <View style={styles.container}>
+        <TouchableOpacity style={styles.cancelButton} onPress={() => router.back()}>
+                <AntDesign name="close" size={24} color="white" />
+            </TouchableOpacity>
                 <Text style={styles.errorText}>{state.error}</Text>
             </View>
         )
