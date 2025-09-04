@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { GoogleSignin, isErrorWithCode, isSuccessResponse } from '@react-native-google-signin/google-signin';
 import { useNavigation } from '@react-navigation/native';
-import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import LottieView from 'lottie-react-native';
@@ -28,23 +28,7 @@ const RegisterScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: process.env.EXPO_PUBLIC_EXPO_CLIENT_ID,
-    iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
-    androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
-    webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID,
-  });
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      SignupWithGoogle(authentication.accessToken).then(res => {
-        if (res.success) {
-          router.push('/(tabs)/Home');
-        }
-      });
-    }
-  }, [response]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
@@ -61,7 +45,41 @@ const RegisterScreen = () => {
 
     return unsubscribe;
   }, [navigation, state.isAuthenticated]);
-
+const HandleGoogle = async ()=>{
+  await GoogleSignin.hasPlayServices();
+  try {
+    const userinfo = await GoogleSignin.signIn();
+    if(isSuccessResponse(userinfo)){
+      const {user} = userinfo;
+      console.log(user);
+      const { name , email  , id  } = user;
+    const res = await SignupWithGoogle({name , email, id});
+    if( res?.msg){
+        Alert.alert('Login Failed',  res?.msg);
+        return;
+    } 
+    if(res?.success === true){
+      router.push('/(tabs)/Home');
+    }
+    }
+  } catch (error) {
+     if(isErrorWithCode(error)){
+            switch (error.code) {
+              case statusCodes.IN_PROGRESS :
+                Alert.alert('loading',"in progress");
+                break;
+            case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+                Alert.alert('Error',"google play service not avialable");
+                break;
+              default:
+                 Alert.alert('Error',"an error has occur");
+                break;
+            }
+            return;
+          }
+      console.log(error);
+  }
+}
   const handleRegister = async () => {
     if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
@@ -148,8 +166,8 @@ const RegisterScreen = () => {
 
         <TouchableOpacity
           style={[styles.registerButton, styles.googleButton, state.isLoading && styles.disabledButton]}
-          onPress={() => promptAsync()}
-          disabled={!request || state.isLoading}
+          onPress={() => HandleGoogle()}
+          disabled={ state.isLoading}
         >
           <FontAwesome name="google" size={20} color="#fff" style={styles.googleIcon} />
           <Text style={styles.registerButtonText}>Sign up with Google</Text>

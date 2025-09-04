@@ -18,8 +18,7 @@
       "bundleIdentifier": "com.yakani.socialapp",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      },
-       "googleServicesFile": "./GoogleService-Info.plist"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,8 +36,7 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
-      "package": "com.yakani.social_app",
-      "googleServicesFile": "./google-services.json"
+      "package": "com.yakani.social_app"
     },
     "web": {
       "bundler": "metro",
@@ -77,6 +75,13 @@
           "supportsBackgroundPlayback": true,
           "supportsPictureInPicture": true
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.476200481826-8du7avd5ig9nfeajtr67j7a7kicd7e75"
+        }
+      
       ]
     ],
     "experiments": {
