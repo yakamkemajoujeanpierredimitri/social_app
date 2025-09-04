@@ -51,7 +51,7 @@ const AuthService = {
   },
   loginWithGoogle: async (accessToken) => {
     try {
-      const response = await apiClient.post('/auth/google/callback/login', { accessToken: accessToken });
+      const response = await apiClient.post('/auth/google/callback/login',accessToken );
       await TokenService.setToken('userToken', response.data.accessToken);
       return {data: response.data};
     } catch (error) {
@@ -62,7 +62,7 @@ const AuthService = {
   },
   SignupWithGoogle: async (accessToken) => {
     try {
-      const response = await apiClient.post('/auth/google/callback/signup', { accessToken: accessToken });
+      const response = await apiClient.post('/auth/google/callback/signup', accessToken);
       await TokenService.setToken('userToken', response.data.accessToken);
       return {data: response.data};
     } catch (error) {
