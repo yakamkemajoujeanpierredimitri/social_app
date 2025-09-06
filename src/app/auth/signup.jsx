@@ -46,8 +46,9 @@ const RegisterScreen = () => {
     return unsubscribe;
   }, [navigation, state.isAuthenticated]);
 const HandleGoogle = async ()=>{
-  await GoogleSignin.hasPlayServices();
+  
   try {
+    await GoogleSignin.hasPlayServices();
     const userinfo = await GoogleSignin.signIn();
     if(isSuccessResponse(userinfo)){
       const {user} = userinfo;
@@ -61,6 +62,8 @@ const HandleGoogle = async ()=>{
     if(res?.success === true){
       router.push('/(tabs)/Home');
     }
+    }else{
+      Alert.alert('Error','Something went wrong');
     }
   } catch (error) {
      if(isErrorWithCode(error)){
@@ -72,7 +75,7 @@ const HandleGoogle = async ()=>{
                 Alert.alert('Error',"google play service not avialable");
                 break;
               default:
-                 Alert.alert('Error',error.message);
+                 Alert.alert('Error',`Error code ${error.code}`);
                 break;
             }
             return;

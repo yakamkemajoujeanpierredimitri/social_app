@@ -45,8 +45,9 @@ const LoginScreen = () => {
   }, [navigation, state.isAuthenticated]);
   
   const HandleGoogleLogin = async ()=>{
-       await GoogleSignin.hasPlayServices();
+     
     try {
+       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
     if(isSuccessResponse(userInfo)){
       const {user} = userInfo;
@@ -73,7 +74,7 @@ const LoginScreen = () => {
             Alert.alert('Error',"google play service not avialable");
             break;
           default:
-             Alert.alert('Error',error.code);
+             Alert.alert('Error',`Error code ${error.code}`);
             break;
         }
         return;
