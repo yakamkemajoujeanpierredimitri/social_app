@@ -24,6 +24,7 @@ const RegisterScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { state, Register, dispatch, SignupWithGoogle } = useAuth();
+  const [loading, setLoading] = useState(false);
   const animationRef = useRef(null);
   const router = useRouter();
   const navigation = useNavigation();
@@ -46,7 +47,7 @@ const RegisterScreen = () => {
     return unsubscribe;
   }, [navigation, state.isAuthenticated]);
 const HandleGoogle = async ()=>{
-  
+  setLoading(true);
   try {
     await GoogleSignin.hasPlayServices();
     const userinfo = await GoogleSignin.signIn();
@@ -81,6 +82,8 @@ const HandleGoogle = async ()=>{
             return;
           }
       console.log(error);
+  }finally{
+    setLoading(false);
   }
 }
   const handleRegister = async () => {
@@ -160,17 +163,17 @@ const HandleGoogle = async ()=>{
         <TouchableOpacity
           style={[styles.registerButton, state.isLoading && styles.disabledButton]}
           onPress={handleRegister}
-          disabled={state.isLoading}
+          disabled={state.isLoading || loading}
         >
           <Text style={styles.registerButtonText}>
-            {state.isLoading ? 'Creating Account...' : 'Register'}
+            {state.isLoading || loading ? 'Creating Account...' : 'Register'}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.registerButton, styles.googleButton, state.isLoading && styles.disabledButton]}
           onPress={() => HandleGoogle()}
-          disabled={ state.isLoading}
+          disabled={ state.isLoading || loading}
         >
           <FontAwesome name="google" size={20} color="#fff" style={styles.googleIcon} />
           <Text style={styles.registerButtonText}>Sign up with Google</Text>

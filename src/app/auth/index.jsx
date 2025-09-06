@@ -21,9 +21,10 @@ import { useNavigation } from '@react-navigation/native';
 WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen = () => {
+   const { state, Login, dispatch, LoginWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { state, Login, dispatch, LoginWithGoogle } = useAuth();
+  const [loading, setLoading] = useState(false);
   const animationRef = useRef(null);
   const router = useRouter();
   const navigation = useNavigation();
@@ -45,7 +46,7 @@ const LoginScreen = () => {
   }, [navigation, state.isAuthenticated]);
   
   const HandleGoogleLogin = async ()=>{
-     
+     setLoading(true);
     try {
        await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
@@ -80,7 +81,9 @@ const LoginScreen = () => {
         return;
       }
       console.log(error);
-    }
+    }finally{
+    setLoading(false);
+  }
   }
 
   
@@ -142,17 +145,17 @@ const LoginScreen = () => {
         <TouchableOpacity
           style={[styles.loginButton, state.isLoading && styles.disabledButton]}
           onPress={handleLogin}
-          disabled={state.isLoading}
+          disabled={state.isLoading || loading}
         >
           <Text style={styles.loginButtonText}>
-            {state.isLoading ? 'Logging in...' : 'Login'}
+            {state.isLoading || loading ? 'Logging in...' : 'Login'}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.loginButton, styles.googleButton]}
           onPress={() => HandleGoogleLogin()}
-          disabled={state.isLoading}
+          disabled={state.isLoading || loading}
         >
           <FontAwesome name="google" size={20} color="#fff" style={styles.googleIcon} />
           <Text style={styles.loginButtonText}>Sign in with Google</Text>
