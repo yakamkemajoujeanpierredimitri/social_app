@@ -73,7 +73,7 @@ const LoginScreen = () => {
             Alert.alert('Error',"google play service not avialable");
             break;
           default:
-             Alert.alert('Error',error.message);
+             Alert.alert('Error',error.code);
             break;
         }
         return;
