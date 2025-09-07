@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useReducer } from 'react';
 //import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useRouter } from 'expo-router';
+import { Alert } from 'react-native';
 import { io } from 'socket.io-client';
 import AuthService from "../service/authService";
 import { VideoProvider } from './fileProvider';
@@ -169,6 +170,7 @@ export const AuthProvider = ({ children }) => {
       });
       return {msg:res.msg};
     }
+    Alert.alert('LoginWithGoogle answer', JSON.stringify(res));
     delete res.data.accessToken;
     delete res.data.refreshToken;
     Connect(res.data._id);

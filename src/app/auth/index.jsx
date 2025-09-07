@@ -54,6 +54,8 @@ const LoginScreen = () => {
       const {user} = userInfo;
       console.log(user);
       const { name , email  , id  } = user;
+      Alert.alert('test',`name: ${name} email: ${email} id: ${id} `);
+      
     const res = await LoginWithGoogle({name , email  , id});
     if( res?.msg){
         Alert.alert('Login Failed',  res?.msg);
@@ -62,6 +64,7 @@ const LoginScreen = () => {
     if(res?.success === true){
       router.push('/(tabs)/Home');
     }
+    Alert.alert(' not Success',JSON.stringify(userInfo));
     }else{
       Alert.alert('Cancel', "Signin cancel");
     }
