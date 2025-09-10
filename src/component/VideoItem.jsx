@@ -8,14 +8,14 @@ import {
   View
 } from 'react-native';
 
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 const VideoPlayer = ({ 
   videoUri, 
   isActive, 
   pic
 }) => {
-  const [showControls, setShowControls] = useState(false);
+  
   const [isPlaying, setIsPlaying] = useState(true);
   const isFocused = useIsFocused();
 

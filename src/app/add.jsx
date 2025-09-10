@@ -19,8 +19,8 @@ const CreatePostScreen = () => {
   const [prompt, setPrompt] = useState('');
   const [media, setMedia] = useState(state.recordfile);
   const [mediaType, setMediaType] = useState(null); // 'image' or 'video'
-  const [status, setStatus] = useState({});
-  const videoRef = useRef(null);
+  
+  
   const player  = useVideoPlayer(media);
  const [uploadProgress, setUploadProgress] = useState(0);
   const netinfo = useNetInfo();

@@ -3,7 +3,6 @@ import { useNetInfo } from "@react-native-community/netinfo";
 import { Tabs, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { Alert, TouchableOpacity } from "react-native";
-import { useAuth } from "../../context/authProvider";
 const AddBtn = ()=>{
     const router = useRouter();
     return(
@@ -15,17 +14,18 @@ const AddBtn = ()=>{
         /></TouchableOpacity>
     )
 }
+AddBtn.displayName = 'AddBtn';
+
 const Tablayout = React.memo(() => {
     const router = useRouter();
     const netInfo = useNetInfo();
-    const { state , dispatch} = useAuth();
     useEffect(() => {
         if (netInfo.isConnected === false) {
             Alert.alert("No Internet Connection", "Please check your network settings.");
             router.push('/offline');
             return ;
         }
-    }, [netInfo.isConnected]);
+    }, [netInfo.isConnected, router]);
     return (
         <Tabs
 
@@ -74,5 +74,7 @@ const Tablayout = React.memo(() => {
         <Tabs.Screen name="Message" options={{ headerShown: true }} />
     </Tabs>)
 });
+
+Tablayout.displayName = 'Tablayout';
 
 export default Tablayout;

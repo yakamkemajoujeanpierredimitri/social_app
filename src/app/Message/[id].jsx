@@ -51,7 +51,7 @@ const ChatScreen = () => {
   const Listenmessage = useCallback(() => {
     if (state.socket) {
       state.socket.on('msg', (message) => {
-        if (message.sender?._id == userId) {
+        if (message.sender?._id === userId) {
           setMessages((prevMessages) => [...prevMessages, message]);
         }
       });
@@ -116,7 +116,6 @@ const ChatScreen = () => {
   };
 
   const formatTimestamp = (timestamp) => {
-    const now = moment();
     const postTime = moment(timestamp);
    
     return postTime.calendar();

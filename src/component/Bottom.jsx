@@ -12,7 +12,7 @@ import { useFile } from '../context/fileProvider';
 import FileService from '../service/fileService';
 import CommentModal from './CommentModal';
 
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 const BottomFeature = ({ file, isActive, index }) => {
   const [isLiked, setIsLiked] = useState(false);

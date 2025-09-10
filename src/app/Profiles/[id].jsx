@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, LayoutAnimation, Platform, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, LayoutAnimation, Platform, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
 import { useAuth } from '../../context/authProvider';
 import UserService from '../../service/userService';
 
@@ -18,7 +18,7 @@ const Profile = () => {
   const router = useRouter();
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
-  const [loading, setLoading] = useState(false);
+  
   const [activeTab, setActiveTab] = useState('posts'); // 'posts' or 'saves'
   const [userPosts, setUserPosts] = useState([]);
   const [savedPosts, setSavedPosts] = useState([]);
@@ -77,14 +77,14 @@ const Profile = () => {
 
   const handleFollow = async () => {
     if (isFollowing) {
-      const res = await UserService.unfollow({ Author: file.sender._id });
+            const res = await UserService.unfollow({ Author: visitor._id });
       if (res.msg) {
         Alert.alert("Error", res.msg);
         return;
       }
       setIsFollowing(false);
     } else {
-      const res = await UserService.follow({ Author: file.sender._id });
+            const res = await UserService.follow({ Author: visitor._id });
       if (res.msg) {
         Alert.alert("Error", res.msg);
         return;

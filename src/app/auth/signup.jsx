@@ -1,5 +1,4 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { GoogleSignin, isErrorWithCode, isSuccessResponse } from '@react-native-google-signin/google-signin';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
@@ -15,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { auth } from '../../../lib/auth'; // Import modifié
 import { useAuth } from '../../context/authProvider';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -28,8 +28,6 @@ const RegisterScreen = () => {
   const animationRef = useRef(null);
   const router = useRouter();
   const navigation = useNavigation();
-
-
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
@@ -46,46 +44,30 @@ const RegisterScreen = () => {
 
     return unsubscribe;
   }, [navigation, state.isAuthenticated]);
-const HandleGoogle = async ()=>{
-  setLoading(true);
-  try {
-    await GoogleSignin.hasPlayServices();
-    const userinfo = await GoogleSignin.signIn();
-    if(isSuccessResponse(userinfo)){
-      const {user} = userinfo;
-      console.log(user);
-      const { name , email  , id  } = user;
-    const res = await SignupWithGoogle({name , email, id});
-    if( res?.msg){
-        Alert.alert('Login Failed',  res?.msg);
-        return;
-    } 
-    if(res?.success === true){
-      router.push('/(tabs)/Home');
+
+  const HandleGoogle = async () => {
+    setLoading(true);
+    try {
+      const result = await auth.authenticate('google');
+      if (result?.user) {
+        const { name, email, id } = result.user;
+        const res = await SignupWithGoogle({ name, email, id });
+        if (res?.msg) {
+          Alert.alert('Signup Failed', res?.msg);
+          return;
+        } 
+        if (res?.success === true) {
+          router.push('/(tabs)/Home');
+        }
+      }
+    } catch (error) {
+      console.error('Google signup error:', error);
+      Alert.alert('Error', error.message || 'Google signup failed');
+    } finally {
+      setLoading(false);
     }
-    }else{
-      Alert.alert('Error','Something went wrong');
-    }
-  } catch (error) {
-     if(isErrorWithCode(error)){
-            switch (error.code) {
-              case statusCodes.IN_PROGRESS :
-                Alert.alert('loading',"in progress");
-                break;
-            case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-                Alert.alert('Error',"google play service not avialable");
-                break;
-              default:
-                 Alert.alert('Error',`Error code ${error.code}`);
-                break;
-            }
-            return;
-          }
-      console.log(error);
-  }finally{
-    setLoading(false);
   }
-}
+
   const handleRegister = async () => {
     if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
@@ -105,13 +87,12 @@ const HandleGoogle = async ()=>{
 
     const res = await Register({ name, email, password });
 
-    if ( res?.msg) {
-      Alert.alert('Registration Failed',  res?.msg);
+    if (res?.msg) {
+      Alert.alert('Registration Failed', res?.msg);
     } 
-    if(res?.success === true){
+    if (res?.success === true) {
       router.push('/(tabs)/Home');
     }
-    
   };
 
   return (
@@ -172,11 +153,13 @@ const HandleGoogle = async ()=>{
 
         <TouchableOpacity
           style={[styles.registerButton, styles.googleButton, state.isLoading && styles.disabledButton]}
-          onPress={() => HandleGoogle()}
-          disabled={ state.isLoading || loading}
+          onPress={HandleGoogle}
+          disabled={state.isLoading || loading}
         >
           <FontAwesome name="google" size={20} color="#fff" style={styles.googleIcon} />
-          <Text style={styles.registerButtonText}>Sign up with Google</Text>
+          <Text style={styles.registerButtonText}>
+            {loading ? 'Connecting...' : 'Sign up with Google'}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -204,7 +187,7 @@ const styles = StyleSheet.create({
     flex: 0.4,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom:0
+    marginBottom: 0
   },
   animation: {
     width: 150,
@@ -261,7 +244,7 @@ const styles = StyleSheet.create({
   loginText: {
     color: '#fe2c55',
     fontSize: 16,
-    marginBottom:20
+    marginBottom: 20
   },
 });
 

@@ -26,7 +26,7 @@ getChat:async (id)=>{
 },
 deleteChat:async (id)=>{
     try {
-        const res = await apiClient.delete(`/message/${id}?app=true`);
+        await apiClient.delete(`/message/${id}?app=true`);
         return {success:true};
     } catch (error) {
          console.error('chatService error:', error);

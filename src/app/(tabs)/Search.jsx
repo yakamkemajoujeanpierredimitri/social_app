@@ -86,7 +86,7 @@ const Search = () => {
       </View>
       {loading && <ActivityIndicator size="large" color="#FFD700" />}
       {notFound && (
-        <Text style={styles.notFound}>No results found for "{query}"</Text>
+        <Text style={styles.notFound}>No results found for &quot;{query}&quot;</Text>
       )}
       <FlatList
         data={results}

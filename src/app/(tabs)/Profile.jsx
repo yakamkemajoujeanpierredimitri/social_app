@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Image, LayoutAnimation, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
+import MessageSkeleton from '../../component/MessageSkeleton';
 import UserList from '../../component/UserList';
 import { useAuth } from '../../context/authProvider';
 import UserService from '../../service/userService';
@@ -67,7 +67,7 @@ const Profile = () => {
     
   }, [user]);
   useEffect(()=>{
-    state.socket.on('uncensore',(id)=>{
+    state.socket?.on('uncensore',(id)=>{
       const newposts = userPosts.map((item)=>{
         if(item._id  === id){
           item.mediaId = null;
@@ -77,7 +77,7 @@ const Profile = () => {
       });
       setUserPosts(newposts);
     });
-    return()=>state.socket.off('uncensore');
+    return()=>state.socket?.off('uncensore');
   },[state.socket]); // Re-fetch if user data changes
 
   const pickImage = async () => {
@@ -172,15 +172,10 @@ const Profile = () => {
   );
   if(user === null){
     return(
-      <View style={styles.container}>
-        <Ionicons
-        name='person'
-        size={52}
-        color={'#FFD700'}
-        style={{alignContent:'center' , alignItems:'center'}}
-        />
-        <Text style={styles.LoadingText}>Loading....</Text>
+      <View  style={styles.container} >
+         <MessageSkeleton/>
       </View>
+     
     );
   }
   return (

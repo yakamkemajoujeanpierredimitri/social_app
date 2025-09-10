@@ -49,7 +49,7 @@ const Fullmain = ({ file, isActive, index }) => {
             setIsFollowing(false);
         } else {
             const res = await UserService.follow({ Author: file.sender._id });
-            if (fileState.error) {
+            if (res.msg) {
                 Alert.alert("Error",fileState.error);
                 return;
             }
@@ -140,8 +140,7 @@ const styles = StyleSheet.create({
         height: SCREEN_HEIGHT,
         flexDirection: "column",
         justifyContent: "center",
-        padding: 10,
-        flexDirection: "column"
+        padding: 10
 
     },
     overlay: {

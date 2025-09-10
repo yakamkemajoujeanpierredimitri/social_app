@@ -14,7 +14,6 @@ import Fullmain from '../../component/Fullmain';
 import { useFile } from '../../context/fileProvider';
 import FileService from '../../service/fileService';
 const {height} = Dimensions.get('screen');
-const SCREEN_HEIGHT = height;
 const HomePage = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [post,setPost] = useState([]);

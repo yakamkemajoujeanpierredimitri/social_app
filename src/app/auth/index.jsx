@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import LottieView from 'lottie-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -13,15 +13,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+import { auth } from '../../../lib/auth'; // Import modifié
 import { useAuth } from '../../context/authProvider';
 
-import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
-import { useNavigation } from '@react-navigation/native';
-
-WebBrowser.maybeCompleteAuthSession();
-
 const LoginScreen = () => {
-   const { state, Login, dispatch, LoginWithGoogle } = useAuth();
+  const { state, Login, dispatch, LoginWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,51 +42,28 @@ const LoginScreen = () => {
     return unsubscribe;
   }, [navigation, state.isAuthenticated]);
   
-  const HandleGoogleLogin = async ()=>{
-     setLoading(true);
+  const HandleGoogleLogin = async () => {
+    setLoading(true);
     try {
-       await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-    if(isSuccessResponse(userInfo)){
-      const {user} = userInfo;
-      console.log(user);
-      const { name , email  , id  } = user;
-      Alert.alert('test',`name: ${name} email: ${email} id: ${id} `);
-      
-    const res = await LoginWithGoogle({name , email  , id});
-    if( res?.msg){
-        Alert.alert('Login Failed',  res?.msg);
-        return;
-    } 
-    if(res?.success === true){
-      router.push('/(tabs)/Home');
-    }
-    Alert.alert(' not Success',JSON.stringify(userInfo));
-    }else{
-      Alert.alert('Cancel', "Signin cancel");
-    }
-    } catch (error) {
-      if(isErrorWithCode(error)){
-        switch (error.code) {
-          case statusCodes.IN_PROGRESS :
-            Alert.alert('loading',"in progress");
-            break;
-        case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            Alert.alert('Error',"google play service not avialable");
-            break;
-          default:
-             Alert.alert('Error',`Error code ${error.code}`);
-            break;
+      const result = await auth.authenticate('google');
+      if (result?.user) {
+        const { name, email, id } = result.user;
+        const res = await LoginWithGoogle({ name, email, id });
+        if (res?.msg) {
+          Alert.alert('Login Failed', res?.msg);
+          return;
+        } 
+        if (res?.success === true) {
+          router.push('/(tabs)/Home');
         }
-        return;
       }
-      console.log(error);
-    }finally{
-    setLoading(false);
+    } catch (error) {
+      console.error('Google login error:', error);
+      Alert.alert('Error', error.message || 'Google login failed');
+    } finally {
+      setLoading(false);
+    }
   }
-  }
-
-  
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -97,12 +71,12 @@ const LoginScreen = () => {
       return;
     }
 
-    const res =  await Login({email,password});
-    if( res?.msg){
-        Alert.alert('Login Failed',  res?.msg);
-        return;
+    const res = await Login({ email, password });
+    if (res?.msg) {
+      Alert.alert('Login Failed', res?.msg);
+      return;
     } 
-    if(res?.success === true){
+    if (res?.success === true) {
       router.push('/(tabs)/Home');
     }          
   };
@@ -121,7 +95,6 @@ const LoginScreen = () => {
           loop
         />
       </View>
-     
 
       <View style={styles.formContainer}>
         <Text style={styles.title}>Welcome Back</Text>
@@ -157,11 +130,13 @@ const LoginScreen = () => {
 
         <TouchableOpacity
           style={[styles.loginButton, styles.googleButton]}
-          onPress={() => HandleGoogleLogin()}
+          onPress={HandleGoogleLogin}
           disabled={state.isLoading || loading}
         >
           <FontAwesome name="google" size={20} color="#fff" style={styles.googleIcon} />
-          <Text style={styles.loginButtonText}>Sign in with Google</Text>
+          <Text style={styles.loginButtonText}>
+            {loading ? 'Connecting...' : 'Sign in with Google'}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -172,7 +147,7 @@ const LoginScreen = () => {
           }}
         >
           <Text style={styles.registerText}>
-            Don't have an account? Sign up
+            Don&apos;t have an account? Sign up
           </Text>
         </TouchableOpacity>
       </View>
