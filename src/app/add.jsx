@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library';
 import { useNavigation, useRouter } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../context/authProvider';
@@ -157,7 +157,7 @@ const CreatePostScreen = () => {
       </View>
         {state.isUploadingVideo && (
         <View style={styles.progressBarContainer}>
-         <Text style={[styles.postButtonText ,{width:`${uploadProgress}%`,backgroundColor:"#2b5aacff"} ]} > {`${uploadProgress}%`}</Text>
+         <Text style={[styles.postButtonText ,{width:`${uploadProgress/2}%`,backgroundColor:"#2b5aacff"} ]} > {`${uploadProgress/2}%`}</Text>
         </View>
       )}
 
