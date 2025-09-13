@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import {
     Alert,
     Dimensions,
@@ -18,121 +18,146 @@ import VideoPlayer from './VideoItem';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const Fullmain = ({ file, isActive, index }) => {
-
+const Fullmain = memo(({ file, isActive, index, shouldPreload = false }) => {
     const router = useRouter();
     const { state: authState, dispatch } = useAuth();
-    const { dispatch: filedispatch , state:fileState } = useFile();
+    const { dispatch: filedispatch, state: fileState } = useFile();
     const [isFollowing, setIsFollowing] = useState(false);
 
     useEffect(() => {
         const checkFollowing = async () => {
-            const res = await UserService.getFollowing();
-            if (res.msg) {
-                console.log(res.msg);
-                return;
+            try {
+                const res = await UserService.getFollowing();
+                if (res.msg) {
+                    console.log(res.msg);
+                    return;
+                }
+                setIsFollowing(res.data.some(followedUser => followedUser.Author?._id === file.sender._id));
+            } catch (error) {
+                console.error('Error checking following status:', error);
             }
-            setIsFollowing(res.data.some(followedUser => followedUser.Author?._id === file.sender._id));
-            //console.log(res.data.some(followedUser => followedUser.Author?._id === file.sender._id));
         };
+        
         if (file?.sender?._id) {
             checkFollowing();
         }
     }, [file?.sender?._id]);
-    const handleFollow = async () => {
-        if (isFollowing) {
-            const res = await UserService.unfollow({ Author: file.sender._id });
-            if (res.msg) {
-                Alert.alert("Error", res.msg);
-                return;
-            }
-            setIsFollowing(false);
-        } else {
-            const res = await UserService.follow({ Author: file.sender._id });
-            if (res.msg) {
-                Alert.alert("Error",fileState.error);
-                return;
-            }
-            setIsFollowing(true);
-        }
 
-    }
-   const handleDelete = async () => {
-        const res = await FileService.deleteFile(filedispatch, file._id);
-        if (fileState.error) {
-            Alert.alert("Error", fileState.error);
-            return;
+    const handleFollow = async () => {
+        try {
+            if (isFollowing) {
+                const res = await UserService.unfollow({ Author: file.sender._id });
+                if (res.msg) {
+                    Alert.alert("Error", res.msg);
+                    return;
+                }
+                setIsFollowing(false);
+            } else {
+                const res = await UserService.follow({ Author: file.sender._id });
+                if (res.msg) {
+                    Alert.alert("Error", fileState.error);
+                    return;
+                }
+                setIsFollowing(true);
+            }
+        } catch (error) {
+            Alert.alert("Error", "Failed to update follow status");
         }
-        router.back();
-        // Navigate back or refresh the feed
-    }
+    };
+
+    const handleDelete = async () => {
+        try {
+            const res = await FileService.deleteFile(filedispatch, file._id);
+            if (fileState.error) {
+                Alert.alert("Error", fileState.error);
+                return;
+            }
+            router.back();
+        } catch (error) {
+            Alert.alert("Error", "Failed to delete file");
+        }
+    };
+
+    const navigateToProfile = () => {
+        dispatch({ type: "SET_visitor", payload: { visitor: file.sender } });
+        router.navigate(`/Profiles/${file.sender._id}`);
+    };
+
     return (
         <View style={styles.container}>
-            {
-                file.path ?
-                    <VideoPlayer
-                        videoUri={file.path}
-                        isActive={isActive}
-                        pic={file.thumbnail}
-                    /> :
-                    <Image
-                        source={{ uri: file.thumbnail }}
-                        style={styles.image}
-                    />
-            }
+            {file.path ? (
+                <VideoPlayer
+                    videoUri={file.path}
+                    isActive={isActive}
+                    pic={file.thumbnail}
+                    preload={shouldPreload}
+                    index={index}
+                />
+            ) : (
+                <Image
+                    source={{ uri: file.thumbnail }}
+                    style={styles.image}
+                    resizeMode="contain"
+                    loadingIndicatorSource={require('../assets/images/placeholder.png')} // Add placeholder
+                />
+            )}
 
-            {/* Video Info Overlay */}
             <BottomFeature
                 file={file}
                 isActive={isActive}
                 index={index}
             />
+            
             <View style={styles.overlay}>
-                {/* Left side - User info and description */}
                 <View style={styles.leftContent}>
                     <View style={styles.userInfo}>
-                        <TouchableOpacity onPress={() => {
-                            dispatch({ type: "SET_visitor", payload: { visitor: file.sender } });
-                            router.navigate(`/Profiles/${file.sender._id}`);
-                        }}>
+                        <TouchableOpacity onPress={navigateToProfile}>
                             <Image
                                 source={{ uri: file.sender.avatar }}
                                 style={styles.avatar}
                             />
                         </TouchableOpacity>
                         <View style={styles.userDetails}>
-                            <Text style={styles.username}>@{file.sender.name === authState.user?.name ? 'You' : file.sender.name}</Text>
+                            <Text style={styles.username}>
+                                @{file.sender.name === authState.user?.name ? 'You' : file.sender.name}
+                            </Text>
                             {!isFollowing && authState.user?._id !== file.sender._id && (
-                                <TouchableOpacity style={styles.followButton} onPress={() => handleFollow()}>
-                                    <Text style={styles.followText}> {isFollowing ? "unFollow" : "Follow"} </Text>
+                                <TouchableOpacity style={styles.followButton} onPress={handleFollow}>
+                                    <Text style={styles.followText}>
+                                        {isFollowing ? "Unfollow" : "Follow"}
+                                    </Text>
                                 </TouchableOpacity>
                             )}
                         </View>
                     </View>
 
-                    <Text style={styles.description}>{file.title}</Text>
-
+                    <Text style={styles.description} numberOfLines={3}>
+                        {file.title}
+                    </Text>
 
                     <View style={styles.hashtagContainer}>
-
                         <Text style={styles.hashtag}>
                             #{file.prompt}
                         </Text>
-
                     </View>
-
                 </View>
+                
                 {authState.user?._id === file.sender._id && (
-                    <TouchableOpacity style={styles.deleteButton} onPress={()=>handleDelete()}>
-                        <Text style={styles.deleteButtonText}>{fileState.isLoading ? 'deleting...' : 'Delete'}</Text>
+                    <TouchableOpacity 
+                        style={styles.deleteButton} 
+                        onPress={handleDelete}
+                        disabled={fileState.isLoading}
+                    >
+                        <Text style={styles.deleteButtonText}>
+                            {fileState.isLoading ? 'Deleting...' : 'Delete'}
+                        </Text>
                     </TouchableOpacity>
                 )}
-
             </View>
-
         </View>
     );
-};
+});
+Fullmain.displayName = 'Fullmain';
 
 const styles = StyleSheet.create({
     container: {
@@ -141,7 +166,6 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         justifyContent: "center",
         padding: 10
-
     },
     overlay: {
         flexDirection: 'row',
@@ -206,7 +230,6 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     image: {
-        objectFit: "contain",
         width: "100%",
         height: 420,
         marginBottom: 10,
@@ -218,13 +241,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 15,
+        opacity: 0.8,
     },
     deleteButtonText: {
         color: '#fff',
         fontSize: 12,
         fontWeight: 'bold',
     },
-
 });
 
-export default Fullmain
+export default Fullmain;
