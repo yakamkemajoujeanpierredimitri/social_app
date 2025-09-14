@@ -18,7 +18,7 @@ import VideoPlayer from './VideoItem';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const Fullmain = memo(({ file, isActive, index, shouldPreload = false }) => {
+const Fullmain = memo(({ file, isActive, index, shouldPreload = false , isFocused }) => {
     const router = useRouter();
     const { state: authState, dispatch } = useAuth();
     const { dispatch: filedispatch, state: fileState } = useFile();
@@ -92,6 +92,7 @@ const Fullmain = memo(({ file, isActive, index, shouldPreload = false }) => {
                     pic={file.thumbnail}
                     preload={shouldPreload}
                     index={index}
+                    isFocused={isFocused}
                 />
             ) : (
                 <Image

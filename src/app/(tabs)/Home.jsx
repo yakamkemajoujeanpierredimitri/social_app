@@ -1,3 +1,4 @@
+// src/app/(tabs)/Home.jsx - Improved Version
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
@@ -10,6 +11,7 @@ import {
   StyleSheet,
   View
 } from 'react-native';
+import { useVideoPreloader, videoCacheManager } from '../../../lib/VideoCache';
 import Fullmain from '../../component/Fullmain';
 import { useFile } from '../../context/fileProvider';
 import FileService from '../../service/fileService';
@@ -19,26 +21,42 @@ const {height} = Dimensions.get('screen');
 const HomePage = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [post, setPost] = useState([]);
+  const [videoPost , setVideos] = useState([]);
   const [currentpage, setCurrentpage] = useState(1);
   const flatListRef = useRef(null);
   const { state, dispatch} = useFile();
   const [currentId, setCurrentPostId] = useState(null);
   const [isScreenFocused, setIsScreenFocused] = useState(true);
   const [refre, setRefreshing] = useState(false);
+  const [preloadRange] = useState(2); // Made this constant
 
-  // Video streaming optimization states
-  const [preloadRange, setPreloadRange] = useState(2); // Preload 2 videos before/after current
-  const lastActiveIndex = useRef(0);
+  // Use the video preloader hook
+  useVideoPreloader(videoPost, activeIndex, preloadRange);
 
   useEffect(() => {
     if (!isScreenFocused) {
       setCurrentPostId(null);
       setN();
+      // Pause all videos when screen is not focused
+      videoCacheManager.cache.forEach((player) => {
+        try {
+          player.pause();
+        } catch (error) {
+          console.warn('Error pausing video:', error);
+        }
+      });
     }
   }, [isScreenFocused]);
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  // Cleanup cache when component unmounts
+  useEffect(() => {
+    return () => {
+      videoCacheManager.clearCache();
+    };
   }, []);
 
   useFocusEffect(
@@ -56,20 +74,30 @@ const HomePage = () => {
   };
 
   const fetchData = async () => {
-    const res = await FileService.getAllFiles(dispatch);
-    if (!state.currentPage) {
-      let n = await AsyncStorage.getItem('currentpage');
-      n = JSON.parse(n) || 1;
-      setCurrentpage(n);
-    } else {
-      setCurrentpage(state.currentPage);
-    }
+    try {
+      const res = await FileService.getAllFiles(dispatch);
+      
+      if (!state.currentPage) {
+        let n = await AsyncStorage.getItem('currentpage');
+        n = JSON.parse(n) || 1;
+        setCurrentpage(n);
+      } else {
+        setCurrentpage(state.currentPage);
+      }
 
-    if (state.error) {
-      Alert.alert('error', state.error);
-      return;
+      if (state.error) {
+        Alert.alert('error', state.error);
+        return;
+      }
+      
+      // Filter out posts without valid video paths
+      const validPosts = res.data.filter(item => item.path && typeof item.path === 'string');
+      setPost(res.data);
+      setVideos(validPosts);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      Alert.alert('Error', 'Failed to load videos');
     }
-    setPost(res.data);
   };
 
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {
@@ -85,16 +113,14 @@ const HomePage = () => {
       setCurrentpage(newActiveIndex + 1);
       const currentId = viewableItems[0].item._id;
       setCurrentPostId(currentId);
-      
-      lastActiveIndex.current = newActiveIndex;
     } else {
       setCurrentPostId(null);
     }
-  }, []);
+  }, [dispatch]);
 
   const viewabilityConfig = useMemo(() => ({
-    itemVisiblePercentThreshold: 70, // Increased threshold for better performance
-    minimumViewTime: 100, // Minimum time to consider an item viewable
+    itemVisiblePercentThreshold: 70,
+    minimumViewTime: 100,
   }), []);
 
   const handleRefresh = async () => {
@@ -103,13 +129,23 @@ const HomePage = () => {
       payload: true
     });
     setRefreshing(true);
+    
     try {
+      // Clear cache before refreshing
+      videoCacheManager.clearCache();
+      
       const res = await FileService.getAlgoFiles(dispatch, currentpage);
       if (res.msg) {
         Alert.alert('Error', res.msg);
         return;
       }
+      
+      const validPosts = res.data.filter(item => item.path && typeof item.path === 'string');
       setPost(res.data);
+      setVideos(validPosts);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      Alert.alert('Error', 'Failed to refresh videos');
     } finally {
       setRefreshing(false);
       dispatch({
@@ -119,9 +155,8 @@ const HomePage = () => {
     }
   };
 
-  // Optimize render item with memoization
   const renderItem = useCallback(({ item, index }) => {
-    const isActive = currentId === item._id;
+    const isActive = currentId === item._id && isScreenFocused;
     const shouldPreload = Math.abs(index - activeIndex) <= preloadRange;
     
     return (
@@ -130,19 +165,18 @@ const HomePage = () => {
         isActive={isActive}
         index={activeIndex}
         shouldPreload={shouldPreload}
+        isFocused={isScreenFocused}
       />
     );
-  }, [currentId, activeIndex, preloadRange]);
+  }, [currentId, activeIndex, preloadRange, isScreenFocused]);
 
-  // Memoized key extractor
   const keyExtractor = useCallback((item) => item._id, []);
 
-  // Get item layout for better scrolling performance
   const getItemLayout = useCallback((data, index) => ({
     length: height,
     offset: height * index,
     index,
-  }), [height]);
+  }), []);
 
   return (
     <View style={styles.container}>
