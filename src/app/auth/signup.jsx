@@ -1,4 +1,3 @@
-import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
@@ -150,8 +149,7 @@ const RegisterScreen = () => {
             {state.isLoading || loading ? 'Creating Account...' : 'Register'}
           </Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
+<TouchableOpacity
           style={[styles.registerButton, styles.googleButton, state.isLoading && styles.disabledButton]}
           onPress={HandleGoogle}
           disabled={state.isLoading || loading}
@@ -160,7 +158,9 @@ const RegisterScreen = () => {
           <Text style={styles.registerButtonText}>
             {loading ? 'Connecting...' : 'Sign up with Google'}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */
+
+        
 
         <TouchableOpacity
           style={styles.loginLink}

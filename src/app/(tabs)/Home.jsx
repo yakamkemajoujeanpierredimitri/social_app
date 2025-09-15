@@ -1,64 +1,47 @@
-// src/app/(tabs)/Home.jsx - Improved Version
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { FlashList } from "@shopify/flash-list";
 import LottieView from 'lottie-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Dimensions,
-  FlatList,
+  Image,
   RefreshControl,
   StyleSheet,
   View
 } from 'react-native';
-import { useVideoPreloader, videoCacheManager } from '../../../lib/VideoCache';
 import Fullmain from '../../component/Fullmain';
 import { useFile } from '../../context/fileProvider';
 import FileService from '../../service/fileService';
+
+import { placeholder } from '../../assets/images';
 
 const {height} = Dimensions.get('screen');
 
 const HomePage = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [post, setPost] = useState([]);
-  const [videoPost , setVideos] = useState([]);
   const [currentpage, setCurrentpage] = useState(1);
   const flatListRef = useRef(null);
   const { state, dispatch} = useFile();
   const [currentId, setCurrentPostId] = useState(null);
   const [isScreenFocused, setIsScreenFocused] = useState(true);
   const [refre, setRefreshing] = useState(false);
-  const [preloadRange] = useState(2); // Made this constant
-
-  // Use the video preloader hook
-  useVideoPreloader(videoPost, activeIndex, preloadRange);
-
-  useEffect(() => {
-    if (!isScreenFocused) {
-      setCurrentPostId(null);
-      setN();
-      // Pause all videos when screen is not focused
-      videoCacheManager.cache.forEach((player) => {
-        try {
-          player.pause();
-        } catch (error) {
-          console.warn('Error pausing video:', error);
-        }
-      });
-    }
-  }, [isScreenFocused]);
+  
+ 
 
   useEffect(() => {
     fetchData();
   }, []);
 
   // Cleanup cache when component unmounts
-  useEffect(() => {
-    return () => {
-      videoCacheManager.clearCache();
-    };
-  }, []);
 
+useEffect(()=>{
+if(!isScreenFocused){
+  setN();
+}
+},[isScreenFocused])
   useFocusEffect(
     useCallback(() => {
       setIsScreenFocused(true);
@@ -91,9 +74,8 @@ const HomePage = () => {
       }
       
       // Filter out posts without valid video paths
-      const validPosts = res.data.filter(item => item.path && typeof item.path === 'string');
       setPost(res.data);
-      setVideos(validPosts);
+      
     } catch (error) {
       console.error('Error fetching data:', error);
       Alert.alert('Error', 'Failed to load videos');
@@ -131,18 +113,13 @@ const HomePage = () => {
     setRefreshing(true);
     
     try {
-      // Clear cache before refreshing
-      videoCacheManager.clearCache();
-      
+      //console.log(currentpage); 
       const res = await FileService.getAlgoFiles(dispatch, currentpage);
       if (res.msg) {
-        Alert.alert('Error', res.msg);
+        //Alert.alert('Error', res.msg);
         return;
       }
-      
-      const validPosts = res.data.filter(item => item.path && typeof item.path === 'string');
       setPost(res.data);
-      setVideos(validPosts);
     } catch (error) {
       console.error('Error refreshing data:', error);
       Alert.alert('Error', 'Failed to refresh videos');
@@ -157,26 +134,18 @@ const HomePage = () => {
 
   const renderItem = useCallback(({ item, index }) => {
     const isActive = currentId === item._id && isScreenFocused;
-    const shouldPreload = Math.abs(index - activeIndex) <= preloadRange;
-    
+
     return (
       <Fullmain
         file={item}
         isActive={isActive}
         index={activeIndex}
-        shouldPreload={shouldPreload}
         isFocused={isScreenFocused}
       />
     );
-  }, [currentId, activeIndex, preloadRange, isScreenFocused]);
+  }, [currentId, activeIndex, isScreenFocused]);
 
   const keyExtractor = useCallback((item) => item._id, []);
-
-  const getItemLayout = useCallback((data, index) => ({
-    length: height,
-    offset: height * index,
-    index,
-  }), []);
 
   return (
     <View style={styles.container}>
@@ -189,16 +158,16 @@ const HomePage = () => {
           style={styles.anim}
         />
       ) : (
-        <FlatList
+        <FlashList
           ref={flatListRef}
           data={post}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
-          getItemLayout={getItemLayout}
+          estimatedItemSize={600}
           
           // Optimization props
           snapToAlignment="start"
-          snapToInterval={height}
+          snapToInterval={600}
           decelerationRate="fast"
           pagingEnabled={true}
           showsVerticalScrollIndicator={false}
@@ -206,8 +175,8 @@ const HomePage = () => {
           // Memory and performance optimization
           initialNumToRender={1}
           maxToRenderPerBatch={2}
-          windowSize={5}
-          removeClippedSubviews={true}
+          windowSize={10}
+          removeClippedSubviews={false}
           updateCellsBatchingPeriod={50}
           
           // Viewability
@@ -223,12 +192,9 @@ const HomePage = () => {
           }
           
           ListEmptyComponent={() => (
-            <LottieView
-              source={require('../../assets/animation/load2.json')}
-              autoPlay
-              loop
-              resizeMode='cover'
-              style={styles.anim}
+            <Image
+            style={styles.anim}
+            source={placeholder}
             />
           )}
         />

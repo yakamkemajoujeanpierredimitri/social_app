@@ -1,0 +1,9 @@
+export const adaptiveIcon = require('./adaptive-icon.png');
+export const favicon = require('./favicon.png');
+export const icon = require('./icon.png');
+export const partialReactLogo = require('./partial-react-logo.png');
+export const placeholder = require('./placeholder.png');
+export const reactLogo = require('./react-logo.png');
+export const splashIcon = require('./splash-icon.png');
+export const yak = require('./yak.png');
+export const  avatar = require('./avatar.png');

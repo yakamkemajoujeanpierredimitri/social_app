@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { avatar } from '../../../assets/images';
 import MessageSkeleton from '../../../component/MessageSkeleton';
 import { useAuth } from '../../../context/authProvider';
 import ChatService from '../../../service/chatService';
@@ -64,7 +65,7 @@ useEffect(() => {
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.chatItem} onPress={() => handleChatPress(item.sender?._id === state.user?._id ? item.receiver : item.sender)}>
-              <Image source={item.sender?._id === state.user?._id ? { uri: item.receiver.avatar } : { uri: item.sender.avatar }} style={ [styles.profileImage , { marginRight: onlineUsers.includes(item.sender?._id === state.user?._id ? item.receiver._id : item.sender._id) ? 1 : 15 }]} />
+              <Image source={(item.sender?.avatar || item.receiver?.avatar) && (item.sender?.avatar !=="/avatar.png" || item.receiver?.avatar !=='/avatar.png') ?  item.sender?._id === state.user?._id ?  { uri: item.receiver.avatar } : { uri: item.sender.avatar } : avatar} style={ [styles.profileImage , { marginRight: onlineUsers.includes(item.sender?._id === state.user?._id ? item.receiver._id : item.sender._id) ? 1 : 15 }]} />
               {onlineUsers.includes(item.sender?._id === state.user?._id ? item.receiver._id : item.sender._id) && <Text style={styles.badge} ></Text>}
               <View style={styles.chatInfo}>
                 <Text style={styles.profileName}>{item.sender?._id === state.user?._id ? item.receiver.name : item.sender.name}</Text>

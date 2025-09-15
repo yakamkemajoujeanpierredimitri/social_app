@@ -2,6 +2,7 @@ import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, LayoutAnimation, Platform, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
+import { avatar } from '../../assets/images';
 import { useAuth } from '../../context/authProvider';
 import UserService from '../../service/userService';
 
@@ -113,7 +114,7 @@ const Profile = () => {
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
-        <Image source={{ uri: visitor?.avatar || 'https://via.placeholder.com/150' }} style={styles.avatar} />
+        <Image source={ visitor?.avatar !== "/avatar.png"  && visitor?.avatar ? { uri: visitor?.avatar  }: avatar} style={styles.avatar} />
         <Text style={styles.name}>{visitor?.name}</Text>
         <View style={styles.statsContainer}>
           <TouchableOpacity style={styles.stat} >

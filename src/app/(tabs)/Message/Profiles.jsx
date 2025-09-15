@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { avatar } from '../../../assets/images';
 import { useAuth } from '../../../context/authProvider';
 import UserService from '../../../service/userService';
 
@@ -62,7 +63,7 @@ const ProfilesScreen = () => {
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.profileItem} onPress={() => handleProfilePress(item)}>
-            <Image source={{ uri: item.avatar }} style={[styles.profileImage , { marginRight: onlineUsers.includes(item._id) ? 1 : 15 }]} />
+            <Image source={item?.avatar && item.avatar !== "/avatar.png"?{ uri: item.avatar }:avatar} style={[styles.profileImage , { marginRight: onlineUsers.includes(item._id) ? 1 : 15 }]} />
             {onlineUsers.includes(item._id) && <Text style={styles.badge} ></Text>}
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>{item.name}</Text>

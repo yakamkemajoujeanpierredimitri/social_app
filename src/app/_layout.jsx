@@ -2,8 +2,6 @@ import { Stack, usePathname, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { AppProvider, useAuth } from '../context/authProvider';
-import { DebugButton, DebugProvider } from '../context/debugContext';
-import { VideoProvider } from '../context/fileProvider';
 
 function RootLayoutNav() {
   const { state } = useAuth();
@@ -22,13 +20,6 @@ function RootLayoutNav() {
     };
     handleNavigation();
   }, [state.isAuthenticated, navigation]);
-
-  // Determine when to show debug button
-  const shouldShowDebugButton = state.isAuthenticated && 
-    (navigation === '/(tabs)/Home' || 
-     navigation === '/Home' || 
-     navigation.includes('tabs') ||
-     navigation.includes('watch'));
 
   return (
     <>
@@ -50,9 +41,6 @@ function RootLayoutNav() {
         <Stack.Screen name="Profiles" options={{ headerShown: true }} />
         <Stack.Screen name="offline" options={{ headerShown: false }} />
       </Stack>
-
-      {/* Debug button - shows on video-related screens */}
-      <DebugButton show={shouldShowDebugButton} />
     </>
   );
 }
@@ -60,12 +48,8 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AppProvider>
-      <VideoProvider>
-        <DebugProvider>
-          <RootLayoutNav />
-          <StatusBar barStyle={'light-content'} />
-        </DebugProvider>
-      </VideoProvider>
+        <RootLayoutNav />
+        <StatusBar barStyle={'light-content'} />
     </AppProvider>
   );
 }

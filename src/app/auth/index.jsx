@@ -1,4 +1,3 @@
-import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
@@ -42,7 +41,7 @@ const LoginScreen = () => {
     return unsubscribe;
   }, [navigation, state.isAuthenticated]);
   
-  const HandleGoogleLogin = async () => {
+ const HandleGoogleLogin = async () => {
     setLoading(true);
     try {
       const result = await auth.authenticate('google');
@@ -128,7 +127,7 @@ const LoginScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
+   <TouchableOpacity
           style={[styles.loginButton, styles.googleButton]}
           onPress={HandleGoogleLogin}
           disabled={state.isLoading || loading}
@@ -138,6 +137,8 @@ const LoginScreen = () => {
             {loading ? 'Connecting...' : 'Sign in with Google'}
           </Text>
         </TouchableOpacity>
+
+       
 
         <TouchableOpacity
           style={styles.registerLink}

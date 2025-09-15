@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { avatar } from '../assets/images';
 
 const UserList = ({ users, onClose }) => {
   const router = useRouter();
@@ -10,7 +11,7 @@ const UserList = ({ users, onClose }) => {
 //console.log(users);
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.userItem} onPress={() => handleUserPress(item._id)}>
-      <Image source={ item.Author?._id ?  { uri: item.Author.avatar } : { uri: item.Follower.avatar }} style={styles.avatar} />
+      <Image source={ item.Author?._id ? item.Author.avatar === '/avatar.png' ? avatar :    { uri: item.Author.avatar } : item.Follower.avatar==='/avatar.png' ? avatar : { uri: item.Follower.avatar || avatar }} style={styles.avatar} />
       <Text style={styles.name}>{item.Author?._id ?  item.Author.name : item.Follower.name}</Text>
     </TouchableOpacity>
   );

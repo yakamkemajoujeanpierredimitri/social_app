@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { avatar, placeholder } from '../assets/images';
 import { useAuth } from '../context/authProvider';
 import { useFile } from '../context/fileProvider';
 import FileService from '../service/fileService';
@@ -18,7 +19,7 @@ import VideoPlayer from './VideoItem';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const Fullmain = memo(({ file, isActive, index, shouldPreload = false , isFocused }) => {
+const Fullmain = memo(({ file, isActive, index, isFocused }) => {
     const router = useRouter();
     const { state: authState, dispatch } = useAuth();
     const { dispatch: filedispatch, state: fileState } = useFile();
@@ -90,7 +91,6 @@ const Fullmain = memo(({ file, isActive, index, shouldPreload = false , isFocuse
                     videoUri={file.path}
                     isActive={isActive}
                     pic={file.thumbnail}
-                    preload={shouldPreload}
                     index={index}
                     isFocused={isFocused}
                 />
@@ -99,7 +99,7 @@ const Fullmain = memo(({ file, isActive, index, shouldPreload = false , isFocuse
                     source={{ uri: file.thumbnail }}
                     style={styles.image}
                     resizeMode="contain"
-                    loadingIndicatorSource={require('../assets/images/placeholder.png')} // Add placeholder
+                    loadingIndicatorSource={placeholder} // Add placeholder
                 />
             )}
 
@@ -114,7 +114,7 @@ const Fullmain = memo(({ file, isActive, index, shouldPreload = false , isFocuse
                     <View style={styles.userInfo}>
                         <TouchableOpacity onPress={navigateToProfile}>
                             <Image
-                                source={{ uri: file.sender.avatar }}
+                                source={file.sender?.avatar && file.sender?.avatar !== "/avatar.png" ? { uri: file.sender.avatar }: avatar}
                                 style={styles.avatar}
                             />
                         </TouchableOpacity>
@@ -163,7 +163,7 @@ Fullmain.displayName = 'Fullmain';
 const styles = StyleSheet.create({
     container: {
         width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
+        height: 600,
         flexDirection: "column",
         justifyContent: "center",
         padding: 10
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     overlay: {
         flexDirection: 'row',
         paddingHorizontal: 10,
-        paddingBottom: 50,
+        paddingBottom: 10,
         background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
     },
     leftContent: {

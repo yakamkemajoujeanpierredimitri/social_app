@@ -41,13 +41,26 @@ const BottomFeature = ({ file, isActive, index }) => {
 
   const handleLike = async () => {
     const newLikedState = !isLiked;
-    // await FileService.addObservation(dispatch,file._id,{likes:1});
-    setIsLiked(true);
+    const num = newLikedState ? likeCount +1 : likeCount -1;
+    setLikeCount(num <0 ? 0: num);
+    setIsLiked(newLikedState);
+    if(newLikedState){
+      await FileService.addObservation(dispatch,{likes:file._id});
+    }
+     
+    
   };
 
   const handleSave = async () => {
-    //await FileService.addObservation(dispatch, file._id,{save:1});
-    setIssave(true);
+    const newsave  = !issave;
+    const num = newsave ? saves +1 : saves -1 ;
+    setSaves(num<0? 0: num);
+    setIssave(newsave);
+    if(newsave){
+      await FileService.addObservation(dispatch, {save:file._id});
+    }
+    
+    
   };
 
   const handleShare = () => {

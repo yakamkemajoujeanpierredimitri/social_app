@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { avatar } from '../../assets/images';
 import MessageSkeleton from '../../component/MessageSkeleton';
 import { useAuth } from '../../context/authProvider';
 import ChatService from '../../service/chatService';
@@ -145,7 +146,7 @@ const ChatScreen = () => {
               dispatch({ type: "SET_visitor", payload: { visitor: recipient } });
               router.navigate(`/Profiles/${recipient._id}`);
             }} >
-              <Image source={{ uri: recipient?.avatar }} style={styles.avatar} /></TouchableOpacity>
+              <Image source={recipient?.avatar && recipient?.avatar !== "/avatar.png"? { uri: recipient?.avatar }:avatar} style={styles.avatar} /></TouchableOpacity>
             <View>
               <Text style={styles.headerName}>{recipient?.name}</Text>
               <Text style={styles.headerStatus}>{isOnline ? 'Online' : 'Offline'}</Text>

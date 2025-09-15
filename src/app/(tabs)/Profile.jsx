@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Image, LayoutAnimation, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
+import { avatar } from '../../assets/images';
 import MessageSkeleton from '../../component/MessageSkeleton';
 import UserList from '../../component/UserList';
 import { useAuth } from '../../context/authProvider';
@@ -181,7 +182,7 @@ const Profile = () => {
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
-        <Image source={{ uri: user?.avatar || 'https://via.placeholder.com/150' }} style={styles.avatar} />
+        <Image source={user?.avatar && user?.avatar !== "/avatar.png"?{ uri: user?.avatar }:avatar} style={styles.avatar} />
         <Text style={styles.name}>{user?.name}</Text>
         <View style={styles.statsContainer}>
           <TouchableOpacity style={styles.stat} onPress={showFollowers}>

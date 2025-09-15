@@ -132,13 +132,17 @@ const FileService = {
         } catch (error) {
             console.log(error);
             const errorMessage = error.response?.data?.message || 'File retrieval failed';
+            dispatch({
+                type: 'FETCH_VIDEO_ERROR',
+                payload: errorMessage
+            });
             return { msg: errorMessage };
         }
     },
-    addObservation: async ( dispatch, id, data) => {
+    addObservation: async ( dispatch,  data) => {
         
         try {
-            const res = await apiClient.post(`/user/observe/${id}?app=true`, data);
+            const res = await apiClient.post(`/user/observe?app=true`, data);
             if (data?.save) {
                 dispatch({
                     type: 'SAVES_VIDEO',
@@ -151,6 +155,7 @@ const FileService = {
                 payload: { success: true }
             });
         } catch (error) {
+            console.log(error);
             const errorMessage = error.response?.data?.message || 'File retrieval failed';
             console.error(errorMessage);
         }
