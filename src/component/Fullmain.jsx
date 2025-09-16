@@ -17,7 +17,7 @@ import UserService from '../service/userService';
 import BottomFeature from './Bottom';
 import VideoPlayer from './VideoItem';
 
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+const {  width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const Fullmain = memo(({ file, isActive, index, isFocused }) => {
     const router = useRouter();
