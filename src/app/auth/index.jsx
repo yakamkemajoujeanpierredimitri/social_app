@@ -1,3 +1,4 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
@@ -12,7 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
 import { auth } from '../../../lib/auth'; // Import modifié
 import { useAuth } from '../../context/authProvider';
 

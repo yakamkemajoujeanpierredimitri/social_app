@@ -1,3 +1,4 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
@@ -15,7 +16,6 @@ import {
 } from 'react-native';
 import { auth } from '../../../lib/auth'; // Import modifié
 import { useAuth } from '../../context/authProvider';
-
 WebBrowser.maybeCompleteAuthSession();
 
 const RegisterScreen = () => {
