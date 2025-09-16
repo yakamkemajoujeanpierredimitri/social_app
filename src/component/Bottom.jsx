@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Dimensions,
   Image,
   StyleSheet,
   Text,
@@ -12,11 +11,12 @@ import { useFile } from '../context/fileProvider';
 import FileService from '../service/fileService';
 import CommentModal from './CommentModal';
 
-const { height, width } = Dimensions.get('window');
+
 
 const BottomFeature = ({ file, isActive, index }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [viewCount , setViewCount] = useState(0);
   const [saves, setSaves] = useState(0);
   const [issave, setIssave] = useState(false);
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
@@ -26,18 +26,31 @@ const BottomFeature = ({ file, isActive, index }) => {
   useEffect(() => {
     if (isActive) {
       paly();
-      console.log(file._id);
+      Control();
     }
   }, [isActive]);
 
   useEffect(() => {
-    setLikeCount(authState.likes);
-    setSaves(authState.saves);
+    setIsLiked(authState.likes.includes(file._id));
+    setIssave(authState.saves.includes(file._id));
   }, [authState.likes, authState.saves]);
 
-  const paly = async () => {
-    await FileService.getObservation(dispatch, file._id);
+  const paly =  async () => {
+   const res  =   await FileService.getObservation(file._id);
+   if(res.msg){
+    console.log(res.msg);
+    return;
+   }
+   setLikeCount(res.data.likesCount);
+   setSaves(res.data.savesCount);
+   setViewCount(res.data.seeCounts);
   };
+const Control = async ()=>{
+  const res = await FileService.getView(dispatch);
+  if(res.msg){
+    console.log(res.msg);
+  }
+}
 
   const handleLike = async () => {
     const newLikedState = !isLiked;
@@ -45,10 +58,9 @@ const BottomFeature = ({ file, isActive, index }) => {
     setLikeCount(num <0 ? 0: num);
     setIsLiked(newLikedState);
     if(newLikedState){
-      await FileService.addObservation(dispatch,{likes:file._id});
+      await FileService.addObservation(dispatch, authState , {likes:file._id});
     }
      
-    
   };
 
   const handleSave = async () => {
@@ -57,7 +69,7 @@ const BottomFeature = ({ file, isActive, index }) => {
     setSaves(num<0? 0: num);
     setIssave(newsave);
     if(newsave){
-      await FileService.addObservation(dispatch, {save:file._id});
+      await FileService.addObservation(dispatch, authState , {save:file._id});
     }
     
     
@@ -101,7 +113,7 @@ const BottomFeature = ({ file, isActive, index }) => {
 
         <TouchableOpacity style={styles.actionButton}>
           <Icon name="eye" size={28} color="#fff" />
-          <Text style={styles.actionText}>{authState.view}</Text>
+          <Text style={styles.actionText}>{viewCount}</Text>
         </TouchableOpacity>
 
         {file.music && (

@@ -25,7 +25,7 @@ getComm:async (id)=>{
 },
 deleteComm:async (id)=>{
     try {
-        const res = await apiClient.delete(`/comment/${id}?app=true`);
+        await apiClient.delete(`/comment/${id}?app=true`);
         return {success:true};
     } catch (error) {
          console.error('CommService error:', error);

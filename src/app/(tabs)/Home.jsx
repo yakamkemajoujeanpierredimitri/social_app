@@ -5,19 +5,18 @@ import LottieView from 'lottie-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
-  Dimensions,
   Image,
   RefreshControl,
   StyleSheet,
   View
 } from 'react-native';
-import Fullmain from '../../component/Fullmain';
 import { useFile } from '../../context/fileProvider';
 import FileService from '../../service/fileService';
 
 import { placeholder } from '../../assets/images';
+import Fullmain from '../../component/Fullmain';
 
-const {height} = Dimensions.get('screen');
+
 
 const HomePage = () => {
   const [activeIndex, setActiveIndex] = useState(0);

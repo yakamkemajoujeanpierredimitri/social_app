@@ -14,9 +14,8 @@ const videoInitialState = {
   error: null,
   refreshing: false,
   recordfile:null,
-  likes:0,
-  view:0,
-  saves:0,
+  likes:[],
+  saves:[],
 };
 
 const videoReducer = (state, action) => {
@@ -48,12 +47,12 @@ const videoReducer = (state, action) => {
     case 'LIKE_VIDEO':
       return {
         ...state,
-        likes:action.payload.success ? state.likes +1 : state.likes,
+        likes:action.payload.data,
       }; 
      case 'SAVES_VIDEO':
       return {
         ...state,
-        saves:action.payload.success ? state.saves +1 : state.saves,
+        saves:action.payload.data,
       }; 
     case 'UPLOAD_VIDEO_START':
       return {
@@ -95,14 +94,7 @@ const videoReducer = (state, action) => {
         ...state,
         currentPage:action.payload.n
       }; 
-      case 'SET_PROP':
-        const {likesCount, savesCount, seeCounts} = action.payload;
-      return {
-        ...state,
-        saves:savesCount,
-        likes:likesCount,
-        view:seeCounts
-      }; 
+    
     case 'CLEAR_ERROR':
       return { ...state, error: null };
     

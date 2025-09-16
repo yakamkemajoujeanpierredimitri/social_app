@@ -8,7 +8,6 @@ import LottieView from 'lottie-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
-  Dimensions,
   Image,
   StyleSheet,
   Text,
@@ -18,7 +17,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useFile } from '../../context/fileProvider';
 
-const { width, height } = Dimensions.get('window');
+
 
 const CameraScreen = () => {
   const { dispatch } = useFile();

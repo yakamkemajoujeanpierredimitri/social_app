@@ -68,7 +68,7 @@ const Fullmain = memo(({ file, isActive, index, isFocused }) => {
 
     const handleDelete = async () => {
         try {
-            const res = await FileService.deleteFile(filedispatch, file._id);
+            await FileService.deleteFile(filedispatch, file._id);
             if (fileState.error) {
                 Alert.alert("Error", fileState.error);
                 return;

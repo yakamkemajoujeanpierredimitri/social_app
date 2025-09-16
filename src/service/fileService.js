@@ -38,7 +38,7 @@ const FileService = {
         dispatch({ type: 'FETCH_VIDEO_START' });
         // Implement file deletion logic here
         try {
-            const res = await apiClient.delete(`/post/${fileId}?app=true`);
+            await apiClient.delete(`/post/${fileId}?app=true`);
           
         } catch (error) {
             console.error('FileService.deleteFile error:', error);
@@ -101,15 +101,12 @@ const FileService = {
         }
 
     },
-    getObservation: async (dispatch,fileId) => {
+    getObservation: async (fileId) => {
         // Implement logic to get observation for a specific file
         
         try {
             const res = await apiClient.get(`/post/observe/${fileId}?app=true`);
-            dispatch({
-                type: 'SET_PROP',
-                payload: res.data
-            });
+           return {data : res.data};
            // console.log(res.data);
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'File retrieval failed';
@@ -139,27 +136,45 @@ const FileService = {
             return { msg: errorMessage };
         }
     },
-    addObservation: async ( dispatch,  data) => {
+    addObservation: async ( dispatch , state ,  data) => {
         
         try {
-            const res = await apiClient.post(`/user/observe?app=true`, data);
+            await apiClient.post(`/user/observe?app=true`, data);
             if (data?.save) {
                 dispatch({
                     type: 'SAVES_VIDEO',
-                    payload: { success: true }
+                    payload:{ data: state.saves.push(data.save) }
                 });
                 return;
             }
             dispatch({
                 type: 'LIKE_VIDEO',
-                payload: { success: true }
+                payload: { data: state.likes.push(data.likes) }
             });
         } catch (error) {
             console.log(error);
             const errorMessage = error.response?.data?.message || 'File retrieval failed';
             console.error(errorMessage);
         }
-    }
+    },
+    getView: async (dispatch) => {
+        // Implement logic to get observation for a specific file
+        try {
+            const res = await apiClient.get(`/user/view?app=true`);
+             dispatch({
+                type: 'LIKE_VIDEO',
+                payload: { data: res.data.likes }
+            });
+            dispatch({
+                    type: 'SAVES_VIDEO',
+                    payload:{ data: res.data.saves }
+                });
+           // console.log(res.data);
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'File retrieval failed';
+            return { msg: errorMessage };
+        }
+    },
 };
 
 export default FileService;

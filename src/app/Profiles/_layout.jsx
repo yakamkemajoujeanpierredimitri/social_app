@@ -1,7 +1,7 @@
 import { useNetInfo } from '@react-native-community/netinfo';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Alert } from 'react-native';
 import { useAuth } from '../../context/authProvider';
 
 export default function ProfilesLayout() {

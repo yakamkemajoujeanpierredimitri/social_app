@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { placeholder } from "../../assets/images";
 import { useFile } from "../../context/fileProvider";
 import FileService from "../../service/fileService";
 
@@ -63,7 +64,7 @@ const Search = () => {
           isLooping
         />
       ) : (
-        <Image source={{ uri: item.thumbnail }} style={styles.image} />
+        <Image source={{ uri: item.thumbnail }} style={styles.image} loadingIndicatorSource={placeholder} />
       )}
       <View style={styles.textContainer}>
         <Text style={styles.title}>{item.title}</Text>
