@@ -241,7 +241,7 @@ const Profile = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{userListTitle}</Text>
-            <UserList users={userList} onClose={() => setModalVisible(false)} />
+            <UserList users={userList} onClose={() => setModalVisible(false)} title={userListTitle} />
           </View>
         </View>
       </Modal>

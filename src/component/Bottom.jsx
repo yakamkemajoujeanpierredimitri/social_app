@@ -26,7 +26,6 @@ const BottomFeature = ({ file, isActive, index }) => {
   useEffect(() => {
     if (isActive) {
       paly();
-      Control();
     }
   }, [isActive]);
 
@@ -45,12 +44,7 @@ const BottomFeature = ({ file, isActive, index }) => {
    setSaves(res.data.savesCount);
    setViewCount(res.data.seeCounts);
   };
-const Control = async ()=>{
-  const res = await FileService.getView(dispatch);
-  if(res.msg){
-    console.log(res.msg);
-  }
-}
+
 
   const handleLike = async () => {
     const newLikedState = !isLiked;

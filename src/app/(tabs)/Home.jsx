@@ -32,6 +32,7 @@ const HomePage = () => {
 
   useEffect(() => {
     fetchData();
+    Control();
   }, []);
 
   // Cleanup cache when component unmounts
@@ -130,6 +131,12 @@ if(!isScreenFocused){
       });
     }
   };
+  const Control = async ()=>{
+    const res = await FileService.getView(dispatch);
+    if(res.msg){
+      console.log(res.msg);
+    }
+  }
 
   const renderItem = useCallback(({ item, index }) => {
     const isActive = currentId === item._id && isScreenFocused;
