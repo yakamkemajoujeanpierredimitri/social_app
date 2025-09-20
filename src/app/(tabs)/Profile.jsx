@@ -239,8 +239,7 @@ const Profile = () => {
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{userListTitle}</Text>
+          <View  style={styles.userList} >
             <UserList users={userList} onClose={() => setModalVisible(false)} title={userListTitle} />
           </View>
         </View>
@@ -439,6 +438,12 @@ const styles = StyleSheet.create({
     margin:20,
     fontSize:20,
     color:"#fff"
+  },
+  userList:{
+    width:"95%",
+    height:'70%',
+    
+
   }
 });
 

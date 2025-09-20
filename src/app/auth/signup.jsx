@@ -158,7 +158,7 @@ const RegisterScreen = () => {
           <Text style={styles.registerButtonText}>
             {loading ? 'Connecting...' : 'Sign up with Google'}
           </Text>
-        </TouchableOpacity> */
+        </TouchableOpacity> 
 
         
 

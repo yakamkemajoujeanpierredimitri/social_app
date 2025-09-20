@@ -143,13 +143,13 @@ const FileService = {
             if (data?.save) {
                 dispatch({
                     type: 'SAVES_VIDEO',
-                    payload:{ data: state.saves.push(data.save) }
+                    payload:{ data: [...state.saves,data.save] }
                 });
                 return;
             }
             dispatch({
                 type: 'LIKE_VIDEO',
-                payload: { data: state.likes.push(data.likes) }
+                payload: { data: [...state.likes, data.likes] }
             });
         } catch (error) {
             console.log(error);
