@@ -49,7 +49,7 @@ const CreatePostScreen = () => {
         setMedia(state.recordfile);
         setMediaType(state.recordfile.type);
     }
-  }, []);
+  }, [state.recordfile]);
     useEffect(() => {
     if (mediaType === 'video' && media) {
       //player.source = {uri:media.uri} ;

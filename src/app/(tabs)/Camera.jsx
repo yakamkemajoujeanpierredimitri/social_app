@@ -145,7 +145,13 @@ const CameraScreen = () => {
         : 'back'
     );
   };
-
+const ToogleCameraMode = () => {
+  setCameraMode(
+    cameraMode === 'video'
+      ? 'picture'
+      : 'video'
+  );
+}
   const handleCameraReady = () => {
     setIsCameraReady(true);
   };
@@ -282,15 +288,32 @@ const CameraScreen = () => {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[
-              styles.captureButton,
+             styles.captureButton,
+              isRecording && styles.disabledButton
+            ]}
+            onPress={ToogleCameraMode}
+            disabled={isRecording || !isCameraReady}
+          >
+            {cameraMode !== 'picture' ? (
+              <Icon name="camera" size={24} color={isRecording ? "#666" : "#fff"} />
+            ) : (
+              <Icon name="videocam" size={24} color={isRecording ? "#666" : "#fff"} />
+            )}
+          </TouchableOpacity>
+          {
+            cameraMode !== 'video' ? 
+         
+          <TouchableOpacity
+            style={[
+              styles.recordButton,
               isRecording && styles.disabledButton
             ]}
             onPress={takePicture}
-            disabled={isRecording || !isCameraReady}
+            disabled={isRecording || !isCameraReady }
           >
             <Icon name="camera" size={24} color={isRecording ? "#666" : "#fff"} />
           </TouchableOpacity>
-          
+          :
           <TouchableOpacity
             style={[
               styles.recordButton,
@@ -298,17 +321,18 @@ const CameraScreen = () => {
               !isCameraReady && styles.disabledButton
             ]}
             onPress={isRecording ? stopRecording : startRecording}
-            disabled={!isCameraReady}
+            disabled={!isCameraReady }
           >
             {isRecording ? (
               <View style={styles.recordingIndicator} />
             ) : (
               <View style={styles.recordDot} />
             )}
-          </TouchableOpacity>
-          
+          </TouchableOpacity> }
+              
+          <TouchableOpacity/>
           {/* Placeholder for symmetry */}
-          <View style={styles.captureButton} />
+          
         </View>
       </View>
     </View>

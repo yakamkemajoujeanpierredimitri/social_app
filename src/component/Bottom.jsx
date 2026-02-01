@@ -30,8 +30,8 @@ const BottomFeature = ({ file, isActive, index }) => {
   }, [isActive]);
 
   useEffect(() => {
-    setIsLiked(authState.likes.includes(file._id));
-    setIssave(authState.saves.includes(file._id));
+    setIsLiked(authState.likes?.some(id => id === file._id) || false);
+    setIssave(authState.saves?.some(id => id === file._id) || false);
   }, [authState.likes, authState.saves]);
 
   const paly =  async () => {
