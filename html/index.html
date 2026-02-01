@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialApp | Connection Reimagined</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #fff; }
+        .hero-gradient { background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0a0a0a 100%); }
+        .text-reveal { animation: reveal 1.5s cubic-bezier(0.77, 0, 0.175, 1) forwards; }
+        @keyframes reveal { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-hover:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <nav class="fixed w-full z-50 flex justify-between items-center px-8 py-6 backdrop-blur-md">
+        <div class="text-xl font-black tracking-tighter">S_APP.</div>
+        <a href="#download" class="bg-white text-black text-xs font-bold px-5 py-2 rounded-full uppercase tracking-widest btn-hover transition-all">Get APK</a>
+    </nav>
+
+    <section class="h-screen flex flex-col justify-center items-center px-4 hero-gradient text-center">
+        <h1 class="text-6xl md:text-9xl font-black tracking-tighter mb-6 text-reveal">
+            CONNECT <br> <span class="text-transparent border-b-4 border-white pb-2" style="-webkit-text-stroke: 1px white;">DEEPER.</span>
+        </h1>
+        <p class="max-w-md text-gray-400 text-lg md:text-xl font-light mb-10 text-reveal" style="animation-delay: 0.2s;">
+            The social architecture for the next generation. Built for speed, privacy, and real interaction.
+        </p>
+        <div class="text-reveal" style="animation-delay: 0.4s;">
+            <a href="#download" class="group flex items-center space-x-4 border border-white/20 px-8 py-4 rounded-full hover:bg-white hover:text-black transition-all duration-500">
+                <span class="font-bold uppercase tracking-widest">Explore MVP</span>
+                <i class="fa-solid fa-arrow-down group-hover:translate-y-1 transition-transform"></i>
+            </a>
+        </div>
+    </section>
+
+    <section id="download" class="py-32 px-8 bg-white text-black">
+        <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-20 items-center">
+            <div>
+                <h2 class="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">READY TO <br>INSTALL?</h2>
+                <p class="text-xl text-gray-600 mb-10 leading-relaxed">
+                    Skip the app stores. Download our official APK directly to your Android device and start connecting instantly.
+                </p>
+                <a href="https://expo.dev/artifacts/eas/uMWJVHLAKHUKmZQ7srp6yT.apk" download class="inline-block bg-black text-white px-12 py-6 rounded-2xl text-xl font-bold btn-hover transition-transform active:scale-95">
+                    <i class="fa-brands fa-android mr-3"></i> Download v1.0.0 APK
+                </a>
+            </div>
+            
+            <div class="bg-gray-100 p-10 rounded-3xl border border-black/5">
+                <h3 class="text-2xl font-bold mb-6 italic">How to install</h3>
+                <ul class="space-y-6">
+                    <li class="flex items-start">
+                        <span class="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center mr-4 shrink-0 font-bold">1</span>
+                        <p class="text-gray-700">Download the <b>.apk</b> file using the button on the left.</p>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center mr-4 shrink-0 font-bold">2</span>
+                        <p class="text-gray-700">Open the file. If prompted, allow <b>"Install from Unknown Sources"</b> in your settings.</p>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center mr-4 shrink-0 font-bold">3</span>
+                        <p class="text-gray-700">Launch the app and create your profile. Welcome to the future.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-20 px-8 border-t border-white/10 text-center">
+        <p class="text-gray-500 uppercase tracking-widest text-xs">© 2026 Developed by a motivated Full Stack Dev</p>
+    </footer>
+
+</body>
+</html>
